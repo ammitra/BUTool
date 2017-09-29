@@ -140,6 +140,16 @@ int main(int argc, char* argv[])
   //Create Command launcher (early, so we can set things)
   Launcher launcher;
 
+
+  //Load libraries from env variable
+  if (NULL != getenv(BUTOOL_AUTOLOAD_LIBRARY_LIST)){
+    std::vector<std::string> libFiles = splitString(getenv(BUTOOL_AUTOLOAD_LIBRARY_LIST),":");
+    for(size_t iLibFile = 0 ; iLibFile < libFiles.size() ; iLibFile++){
+      cli.ProcessString("add_lib " + libFiles[iLibFile]);
+    }
+  }
+
+
   
   try {
     TCLAP::CmdLine cmd("Tool for talking to AMC13 modules.",
@@ -226,13 +236,6 @@ int main(int argc, char* argv[])
   }
 
 
-  //Load libraries from env variable
-  if (NULL != getenv(BUTOOL_AUTOLOAD_LIBRARY_LIST)){
-    std::vector<std::string> libFiles = splitString(getenv(BUTOOL_AUTOLOAD_LIBRARY_LIST),":");
-    for(size_t iLibFile = 0 ; iLibFile < libFiles.size() ; iLibFile++){
-      cli.ProcessString("add_lib " + libFiles[iLibFile]);
-    }
-  }
 
 
 
