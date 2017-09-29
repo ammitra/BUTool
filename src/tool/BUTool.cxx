@@ -145,7 +145,16 @@ int main(int argc, char* argv[])
   if (NULL != getenv(BUTOOL_AUTOLOAD_LIBRARY_LIST)){
     std::vector<std::string> libFiles = splitString(getenv(BUTOOL_AUTOLOAD_LIBRARY_LIST),":");
     for(size_t iLibFile = 0 ; iLibFile < libFiles.size() ; iLibFile++){
-      cli.ProcessString("add_lib " + libFiles[iLibFile]);
+      //Add a add_lib command for each library
+      cli.ProcessString("add_lib " + libFiles[iLibFile]);      
+      //Ask the CLI to process this command.
+      std::vector<std::string> command = cli.GetInput(&launcher);
+      //If the command was well formed, tell the launcher to launch it. 
+      if(command.size() > 0){
+	//Launch command function (for add lib)
+	launcher.EvaluateCommand(command);
+	//Ignore the return value.  It eithe works or not.
+      }
     }
   }
 
