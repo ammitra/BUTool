@@ -1,0 +1,39 @@
+# Generic Makefile for a shared object library
+
+# FIXME: This name synchronization won't work as expected when building
+# multiple pkgs with one Makefile, need to set both name and lib when doing so
+name?=$(lib)
+lib?=$(name)
+
+ccflags+=$($(name)_CCFLAGS) -fPIC
+
+include generic.common.gmk
+
+libfile=$(LIBDIR)/lib$(lib).so
+$(name)_products:=$(libfile)
+
+# Use the plain C linker when no C++ sources are present
+ifeq ($(sources_cxx),)
+link=$(CC)
+else
+link=$(CXX)
+endif
+
+define rules :=
+
+$(libfile): $(patsubst %, $(OBJDIR)/%.o, $(sources_c) $(sources_cxx))$(patsubst %,$$(%_products),$(depends))
+	@mkdir -p $$(dir $$@)
+	$(link) -o $$@ -shared $(patsubst %, $(OBJDIR)/%.o, $(sources_c) $(sources_cxx)) $(genLDFLAGS)
+
+install_$(name):
+	cp $(libfile) $(DESTDIR)/lib/
+	@rm -rf $(DESTDIR)/include/$(lib)
+ifneq ($(wildcard $(include)),)
+	@mkdir $(DESTDIR)/include/$(lib)
+	cp -r $(include)/* $(DESTDIR)/include/$(lib)/ || true
+endif
+
+$(name): $($(name)_products)
+
+endef
+$(eval $(rules))

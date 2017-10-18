@@ -5,7 +5,7 @@
 #include <string>
 #include <stdint.h>
 
-#include "tool/ToolException.hh"
+#include "ToolException.hh"
 
 //===================================
 //Command data structure functor class

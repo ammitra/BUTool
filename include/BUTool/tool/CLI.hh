@@ -14,7 +14,7 @@
 #include <readline/history.h>
 
 //helper for auto-complete
-#include "tool/CLIHelper.hh"
+#include "CLIHelper.hh"
 
 namespace BUTool {
   

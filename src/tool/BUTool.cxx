@@ -14,7 +14,7 @@
 #include <BUException/ExceptionBase.hh>
 
 #include <readline/readline.h> //for rl_delete_text
-#include <signal.h> //signals                                                                            
+#include <signal.h> //signals
 
 #include "helpers/parseHelpers.hh"
 

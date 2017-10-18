@@ -5,8 +5,8 @@
 #include <sstream>
 #include <map>
 #include <stdint.h>
-#include "tool/CommandReturn.hh"
-#include "tool/CommandList.hh"
+#include "CommandReturn.hh"
+#include "CommandList.hh"
 
 //Devices
 //#include <devices/WIB/WIBDevice.hpp>

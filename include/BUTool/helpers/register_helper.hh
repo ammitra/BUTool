@@ -1,7 +1,7 @@
 #ifndef __REGISTER_HELPER_HH__
 #define __REGISTER_HELPER_HH__
 
-#include "tool/CommandReturn.hh"
+#include "../tool/CommandReturn.hh"
 
 #include <string>
 #include <vector>

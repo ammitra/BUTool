@@ -1,0 +1,34 @@
+# Generic Makefile for an executable
+
+# FIXME: This name synchronization won't work as expected when building
+# multiple pkgs with one Makefile, need to set both name and exe when doing so
+name?=$(exe)
+exe?=(name)
+
+ccflags+=
+
+include generic.common.gmk
+
+exefile=$(BINDIR)/$(exe)
+$(name)_products:=$(exefile)
+
+# Use the plain C linker when no C++ sources are present
+ifeq ($(sources_cxx),)
+cclink=$(CC)
+else
+cclink=$(CXX)
+endif
+
+define rules :=
+
+$(exefile): $(patsubst %, $(OBJDIR)/%.o, $(sources_c) $(sources_cxx)) $(patsubst %,$$(%_products),$(depends))
+	@mkdir -p $$(dir $$@)
+	$(cclink) -o $$@ $(patsubst %, $(OBJDIR)/%.o, $(sources_c) $(sources_cxx)) $(genLDFLAGS)
+
+install_$(name): install_prepare $(exefile)
+	cp $(exefile) $(DESTDIR)/bin/
+
+$(name): $($(name)_products)
+
+endef
+$(eval $(rules))

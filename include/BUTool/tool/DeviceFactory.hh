@@ -5,7 +5,7 @@
 #include <vector>
 #include <map>
 
-#include "tool/CommandList.hh"
+#include "CommandList.hh"
 
 
 #define RegisterDevice(ClassName,ClassNickName,ClassHelp,CLIFlag,CLIFullFlag,CLIDescription) \

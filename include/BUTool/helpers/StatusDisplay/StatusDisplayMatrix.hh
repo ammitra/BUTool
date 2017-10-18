@@ -8,7 +8,7 @@
 #include <map>
 #include <boost/unordered_map.hpp>
 #include <boost/tokenizer.hpp> //for tokenizer
-#include <helpers/StatusDisplay/StatusDisplayCell.hh>
+#include "StatusDisplayCell.hh"
 
 
 #define STATUS_DISPLAY_DEFAULT_FORMAT "X"

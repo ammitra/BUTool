@@ -9,10 +9,16 @@ Instructions on how to add plug-ins can be found on the BUTool wiki
 http://gauss.bu.edu/redmine/projects/butool/wiki/BUTool_Wiki
 
 =================================================================================
-== Basic Build instructions
+== Basic Build and Install instructions
 =================================================================================
-After checkout out the BUTool source, type "source env.sh" and then type "make".
-
+After checkout out the BUTool source:
+  Create an an installation directory or use an existing directory
+  $ PREFIX=<path to instalation directory> ./setup.sh
+  $ source env.sh
+  $ make install
+  To add the installation directory to PATH and to set env vars for building
+    BUTool plugins:
+  $ source useprefix.sh
 
 =================================================================================
 == Bug/issue tracking: 

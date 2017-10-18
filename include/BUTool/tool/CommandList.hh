@@ -3,10 +3,10 @@
 #include <string>
 #include <vector>
 #include <map>
-#include "tool/CommandReturn.hh"
-#include "tool/CommandDataStructure.hh"
+#include "CommandReturn.hh"
+#include "CommandDataStructure.hh"
 #include <boost/tokenizer.hpp>
-#include "tool/ToolException.hh"
+#include "ToolException.hh"
 
 namespace BUTool{
 

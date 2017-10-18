@@ -26,7 +26,8 @@ CommandReturn::status Launcher::AddLib(std::vector<std::string> strArg,std::vect
 }
 
 
-CommandReturn::status Launcher::AddDevice(std::vector<std::string> strArg,std::vector<uint64_t> /*intArg*/){  
+CommandReturn::status Launcher::AddDevice(std::vector<std::string> strArg,std::vector<uint64_t> intArg){  
+  (void) intArg; // to make compiler not complain about unused arguments
 
   if(strArg.size() > 0){
     CommandListBase * newDevice = NULL;

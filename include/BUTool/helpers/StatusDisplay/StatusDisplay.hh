@@ -9,8 +9,8 @@
 #include <boost/unordered_map.hpp>
 #include <boost/tokenizer.hpp> //for tokenize
 
-#include <helpers/StatusDisplay/StatusDisplayMatrix.hh>
-#include <helpers/StatusDisplay/StatusDisplayCell.hh>
+#include "StatusDisplayMatrix.hh"
+#include "StatusDisplayCell.hh"
 
 
 namespace BUTool{
