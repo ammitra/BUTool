@@ -1,6 +1,6 @@
-#include "tool/Launcher.hh"
+#include "Launcher.hh"
 //#include "amc13_device/amc13_device.hh"
-#include "tool/DeviceFactory.hh"
+#include "DeviceFactory.hh"
 
 using namespace BUTool;
 

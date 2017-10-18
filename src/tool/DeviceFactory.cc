@@ -1,4 +1,4 @@
-#include "tool/DeviceFactory.hh"
+#include "DeviceFactory.hh"
 #include <boost/algorithm/string/case_conv.hpp>
 
 //Singleton

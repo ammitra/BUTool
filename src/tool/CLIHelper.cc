@@ -1,5 +1,5 @@
-#include "tool/CLIHelper.hh"
-#include "tool/Launcher.hh"
+#include "CLIHelper.hh"
+#include "Launcher.hh"
 
 //gnu readline
 #include <readline/readline.h>

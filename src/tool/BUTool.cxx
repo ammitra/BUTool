@@ -6,10 +6,10 @@
 
 //TCLAP parser
 #include <tclap/CmdLine.h>
-#include "tool/Launcher.hh"
-#include "tool/CLI.hh"
-#include "tool/CommandReturn.hh"
-#include "tool/DeviceFactory.hh"
+#include "Launcher.hh"
+#include "CLI.hh"
+#include "CommandReturn.hh"
+#include "DeviceFactory.hh"
 
 #include <BUException/ExceptionBase.hh>
 

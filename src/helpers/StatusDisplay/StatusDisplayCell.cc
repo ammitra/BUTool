@@ -7,8 +7,8 @@
 #include <stdio.h> //snprintf
 #include <stdlib.h> //strtoul
 
-#include <tool/ToolException.hh>
-#include <helpers/StatusDisplay/StatusDisplayCell.hh>
+#include "ToolException.hh"
+#include "helpers/StatusDisplay/StatusDisplayCell.hh"
 
 //For PRI macros
 #define __STDC_FORMAT_MACROS
