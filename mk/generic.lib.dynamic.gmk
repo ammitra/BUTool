@@ -9,7 +9,7 @@ ccflags+=$($(name)_CCFLAGS) -fPIC
 
 include generic.common.gmk
 
-libfile=$(LIBDIR)/lib$(lib).so
+libfile?=$(LIBDIR)/lib$(lib).so
 $(name)_products:=$(libfile)
 
 # Use the plain C linker when no C++ sources are present
@@ -19,6 +19,17 @@ else
 link=$(CXX)
 endif
 
+ifndef installrule
+define installrule
+	cp $(libfile) $(DESTDIR)/lib/
+	@rm -rf $(DESTDIR)/include/$(lib)
+ifneq ($(wildcard $(include)),)
+	@mkdir $(DESTDIR)/include/$(lib)
+	cp -r $(include)/* $(DESTDIR)/include/$(lib)/ || true
+endif
+endef
+endif
+
 define rules :=
 
 $(libfile): $(patsubst %, $(OBJDIR)/%.o, $(sources_c) $(sources_cxx))$(patsubst %,$$(%_products),$(depends))
@@ -26,14 +37,15 @@ $(libfile): $(patsubst %, $(OBJDIR)/%.o, $(sources_c) $(sources_cxx))$(patsubst 
 	$(link) -o $$@ -shared $(patsubst %, $(OBJDIR)/%.o, $(sources_c) $(sources_cxx)) $(genLDFLAGS)
 
 install_$(name):
-	cp $(libfile) $(DESTDIR)/lib/
-	@rm -rf $(DESTDIR)/include/$(lib)
-ifneq ($(wildcard $(include)),)
-	@mkdir $(DESTDIR)/include/$(lib)
-	cp -r $(include)/* $(DESTDIR)/include/$(lib)/ || true
-endif
+$(installrule)
 
 $(name): $($(name)_products)
 
 endef
 $(eval $(rules))
+
+undefine installrule
+undefine rules
+undefine libname
+undefine name
+undefine lib

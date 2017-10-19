@@ -19,8 +19,8 @@ include generic.lib.dynamic.gmk
 name=BUTool_exe
 exe=BUTool
 ldflags=-lBUTool -lBUException -lreadline
-# Let BUTool find device libraries in lib/BUTool/
-ldflags+=-Wl,-rpath=$(PREFIX)/lib/BUTool
+# Let BUTool find device libraries in lib/BUTool/device
+ldflags+=-Wl,-rpath=$(PREFIX)/lib/BUTool/device
 sources_cxx=src/tool/BUTool.cxx
 depends=BUTool_lib
 include generic.executable.gmk

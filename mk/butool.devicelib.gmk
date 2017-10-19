@@ -1,0 +1,11 @@
+name?=$(device)
+libsubdir=BUTool/device
+libfile=$(MAKEOBJDIR)/lib/$(libsubdir)/$(device).so
+ldflags+=-lBUTool
+
+define installrule
+	@mkdir -p $(DESTDIR)/lib/$(libsubdir)
+	cp $(libfile) $(DESTDIR)/lib/$(libsubdir)/
+endef
+
+include generic.lib.dynamic.gmk
