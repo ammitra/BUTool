@@ -120,6 +120,32 @@ namespace BUTool{
 	val += uint64_t(word[i]);
       }
     }
+    
+    //We do not support signed integers that have more than 32 bits
+    if(iequals(format,std::string("d")) &&
+       word.size() == 1){
+      //This is goign to be printed with "d", so we need to sign extend the number we just comptued
+      uint64_t temp_mask = GetMask();
+
+      //Count bits in mask 
+      uint64_t b; // c accumulates the total bits set in v
+
+      for (b = 0; temp_mask; temp_mask >>= 1)
+	{
+	  b += temp_mask & 1;
+	}
+
+
+      // sign extend magic from https://graphics.stanford.edu/~seander/bithacks.html#FixedSignExtend
+      int64_t x = val;      // sign extend this b-bit number to r
+      int64_t r;      // resulting sign-extended number
+      int64_t const m = 1U << (b - 1); // mask can be pre-computed if b is fixed
+
+      x = x & ((1U << b) - 1);  // (Skip this if bits in x above position b are already zero.)
+      r = (x ^ m) - m;
+      val = (uint64_t) r;
+    }
+
     return val;
   }
 
