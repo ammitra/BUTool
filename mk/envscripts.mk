@@ -33,15 +33,17 @@ export PATH="$$PATH:$$PREFIX/bin"
 endef
 export useprefix_sh
 
-envscripts: env.sh useprefix.sh
+#envscripts: env.sh useprefix.sh
+envscripts: env.sh
 
 env.sh: Makefile
 	@echo $@
 	@echo "$$sourcecheck" > $@
 	@echo "$$env_sh" >> $@
-
-useprefix.sh: Makefile
-	@echo $@
-	@echo "$$sourcecheck" > $@
-	@echo "$$env_sh" >> $@
 	@echo "$$useprefix_sh" >> $@
+
+#useprefix.sh: Makefile
+#	@echo $@
+#	@echo "$$sourcecheck" > $@
+#	@echo "$$env_sh" >> $@
+#	@echo "$$useprefix_sh" >> $@
