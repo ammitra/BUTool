@@ -2,7 +2,7 @@ ifeq ($(PREFIX),)
 $(error Choose a PREFIX before creating source scripts)
 endif
 
-define sourcecheck :=
+define sourcecheck
 if [[ $$_ == $$0 ]]; then  
   echo "$$0 is meant to be sourced:"
   echo "  source $$0"
@@ -12,13 +12,16 @@ fi
 endef
 export sourcecheck
 
-define env_sh :=
+# =======
+define buildenv
 export PREFIX="$(PREFIX)"
 export MAKEFLAGS="-I $(PWD)/mk"
 endef
-export env_sh
+# =======
+export buildenv
 
-define useprefix_sh :=
+# =======
+define runenv
 # Adds PREFIX to executable path, library path, and compiler flags
 
 if [[ -z $$PREFIX ]]; then
@@ -28,22 +31,21 @@ fi
 
 export CPPFLAGS="-isystem $$PREFIX/include"
 export LDFLAGS="-L$$PREFIX/lib"
-export LD_LIBRARY_PATH="$$PREFIX/lib"
 export PATH="$$PATH:$$PREFIX/bin"
 endef
-export useprefix_sh
+# =======
+export runenv
 
-#envscripts: env.sh useprefix.sh
-envscripts: env.sh
+envscripts: env.sh buildenv.sh
 
 env.sh: Makefile
 	@echo $@
 	@echo "$$sourcecheck" > $@
-	@echo "$$env_sh" >> $@
+	@echo "$$buildenv" >> $@
+	@echo "$$runenv" >> $@
 	@echo "$$useprefix_sh" >> $@
 
-#useprefix.sh: Makefile
-#	@echo $@
-#	@echo "$$sourcecheck" > $@
-#	@echo "$$env_sh" >> $@
-#	@echo "$$useprefix_sh" >> $@
+buildenv.sh: Makefile
+	@echo $@
+	@echo "$$sourcecheck" > $@
+	@echo "$$buildenv" >> $@

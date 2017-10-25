@@ -22,9 +22,8 @@ endif
 ifndef installrule
 define installrule
 	cp $(libfile) $(DESTDIR)/lib/
-	@rm -rf $(DESTDIR)/include/$(lib)
 ifneq ($(wildcard $(include)),)
-	@mkdir $(DESTDIR)/include/$(lib)
+	@mkdir -p $(DESTDIR)/include/$(lib)
 	cp -r $(include)/* $(DESTDIR)/include/$(lib)/ || true
 endif
 endef

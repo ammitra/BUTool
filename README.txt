@@ -16,9 +16,6 @@ After checkout out the BUTool source:
   $ PREFIX=<path to instalation directory> ./setup.sh
   $ source env.sh
   $ make install
-  To add the installation directory to PATH and to set env vars for building
-    BUTool plugins:
-  $ source useprefix.sh
 
 =================================================================================
 == Bug/issue tracking: 
