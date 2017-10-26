@@ -6,9 +6,11 @@ export generic_common_gmk=1
 
 MAKEOBJDIR?=./build
 
-LIBDIR?=$(MAKEOBJDIR)/lib
 OBJDIR?=$(MAKEOBJDIR)/obj
+
+LIBDIR?=$(MAKEOBJDIR)/lib
 BINDIR?=$(MAKEOBJDIR)/bin
+INCDIR?=$(MAKEOBJDIR)/include
 
 DESTDIR?=$(PREFIX)
 
@@ -18,12 +20,17 @@ DESTDIR?=$(PREFIX)
 clean:
 	rm -rf $(MAKEOBJDIR)
 
+ifeq ($(abspath $(MAKEOBJDIR)),$(abspath $(DESTDIR)))
+install_prepare:
+	@echo "MAKEOBJDIR and DESTDIR refer to same location; nothing to install"; exit 1
+else
 install_prepare:
 	@[ ! -z $(DESTDIR) ] && [ -d $(DESTDIR) ] || \
 (echo "Error: destdir does not exist"; exit 1)
 	@mkdir -p $(DESTDIR)/include
 	@mkdir -p $(DESTDIR)/lib
 	@mkdir -p $(DESTDIR)/bin
+endif
 
 endif
 

@@ -10,7 +10,9 @@ ccflags+=$($(name)_CCFLAGS) -fPIC
 include generic.common.gmk
 
 libfile?=$(LIBDIR)/lib$(lib).so
-$(name)_products:=$(libfile)
+libincludedir?=$(INCDIR)/$(lib)
+incfiles=$(patsubst $(include)/%,$(libincludedir)/%,$(wildcard $(include)/*))
+$(name)_products:=$(libfile) $(incfiles)
 
 # Use the plain C linker when no C++ sources are present
 ifeq ($(sources_cxx),)
@@ -24,7 +26,7 @@ define installrule
 	cp $(libfile) $(DESTDIR)/lib/
 ifneq ($(wildcard $(include)),)
 	@mkdir -p $(DESTDIR)/include/$(lib)
-	cp -r $(include)/* $(DESTDIR)/include/$(lib)/ || true
+	cp -r $(libincludedir)/* $(DESTDIR)/include/$(lib)/ || true
 endif
 endef
 endif
@@ -34,6 +36,12 @@ define rules :=
 $(libfile): $(patsubst %, $(OBJDIR)/%.o, $(sources_c) $(sources_cxx))$(patsubst %,$$(%_products),$(depends))
 	@mkdir -p $$(dir $$@)
 	$(link) -o $$@ -shared $(patsubst %, $(OBJDIR)/%.o, $(sources_c) $(sources_cxx)) $(genLDFLAGS)
+
+# By "building" the header files (simply copying) we ensure that headers are consistent with built libraries;
+# Plugins SHOULD NOT be including headers directly from BUTool sources!  See env.sh.
+$(incfiles): $(libincludedir)/% : $(include)/%
+	@mkdir -p $$(dir $$@)
+	cp -r $$< $$@
 
 install_$(name):
 $(installrule)

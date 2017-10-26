@@ -1,7 +1,7 @@
-ifeq ($(PREFIX),)
-$(error Choose a PREFIX before creating source scripts)
-endif
+PREFIX?=./build
+PREFIX:=$(abspath $(PREFIX))
 
+# =======
 define sourcecheck
 if [[ $$_ == $$0 ]]; then  
   echo "$$0 is meant to be sourced:"
@@ -10,31 +10,27 @@ if [[ $$_ == $$0 ]]; then
 fi
 
 endef
+# =======
 export sourcecheck
 
 # =======
 define buildenv
 export PREFIX="$(PREFIX)"
 export MAKEFLAGS="-I $(PWD)/mk"
+export CPPFLAGS="-isystem $(PREFIX)/include"
+export LDFLAGS="-L$(PREFIX)/lib"
 endef
 # =======
 export buildenv
 
 # =======
 define runenv
-# Adds PREFIX to executable path, library path, and compiler flags
-
-if [[ -z $$PREFIX ]]; then
-  echo "PREFIX must be set before sourcing this script"
-  return 0
-fi
-
-export CPPFLAGS="-isystem $$PREFIX/include"
-export LDFLAGS="-L$$PREFIX/lib"
-export PATH="$$PATH:$$PREFIX/bin"
+export PATH="$$PATH:$(PREFIX)/bin"
 endef
 # =======
 export runenv
+
+.DEFAULT_GOAL=env.sh
 
 envscripts: env.sh buildenv.sh
 

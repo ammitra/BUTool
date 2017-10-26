@@ -1,9 +1,8 @@
 #!/bin/sh
 
-# Generate env.sh and useprefix.sh
-# PREFIX must be set when running this script; resulting env.sh can then be
-#   used to restore this value of PREFIX
+# Generate env.sh and buildenv.sh
 
-make -f mk/envscripts.mk -B envscripts || exit 1
-#echo "Source env.sh and run 'make install' to install BUTool"
-#echo "Source useprefix.sh before building and using any BUTool device libraries"
+make -f mk/envscripts.mk -B $@ || exit 1
+if [ -z "$@" ]; then
+echo "Source env.sh and run 'make' to build BUTool"
+fi
