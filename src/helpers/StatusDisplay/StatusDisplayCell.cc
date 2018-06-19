@@ -166,7 +166,7 @@ namespace BUTool{
       boost::tokenizer<boost::char_separator<char> > tokenizedFormat(workingString,sep);
       //      snprintf(buffer,strlen(buffer)," ");
       uint64_t regValue = ComputeValue();
-
+      
       for(boost::tokenizer<boost::char_separator<char> >::iterator itTok = tokenizedFormat.begin();
 	  itTok != tokenizedFormat.end();
 	  ++itTok){
@@ -182,15 +182,15 @@ namespace BUTool{
 	//get the numeric value from the first part of this token
 	//	printf("\n\n%s        %s %s \n",itTok->c_str(),itTok->substr(0,itTok->find(' ')).c_str(),itTok->substr(itTok->find(' ')+1).c_str());
 	uint64_t numericValue = strtoul(itTok->substr(0,itTok->find(' ')).c_str(),NULL,0);
-	//	printf("0x%016"PRIX64" 0x%016"PRIX64" %s\n",numericValue,regValue,itTok->c_str());
+	//printf("0x%016" PRIX64 " 0x%016" PRIX64 "\n",numericValue,regValue);
 	if(regValue == numericValue){
-	  //	  printf("0x%016"PRIX64" 0x%016"PRIX64" %s\n",numericValue,regValue,itTok->c_str());
+	  //	  printf("0x%016" PRIX64 " 0x%016" PRIX64 " %s\n",numericValue,regValue,itTok->c_str());
 	  if('t' == format[0]){
 	    //Just format for 't'
 	    snprintf(buffer,bufferSize,"%s",itTok->substr(itTok->find(' ')+1).c_str());
 	  }else{
 	    //format and number in hex for 'T'
-	    snprintf(buffer,bufferSize,"%s (0x%"PRIX64")",itTok->substr(itTok->find(' ')+1).c_str(),regValue);
+	    snprintf(buffer,bufferSize,"%s (0x%" PRIX64 ")",itTok->substr(itTok->find(' ')+1).c_str(),regValue);
 	  }
 	  break;
 	}

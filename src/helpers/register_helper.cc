@@ -82,7 +82,7 @@ CommandReturn::status BUTool::RegisterHelper::Read(std::vector<std::string> strA
       }
       //Print the value if we are suppose to
       if(!skipPrintZero ||  (val != 0)){
-	printf(" %0*"PRIX64"", printWord64?16:8, val);	
+	printf(" %0*" PRIX64, printWord64?16:8, val);	
       }else{
 	printf(" %*s", printWord64?16:8," ");	
       }
@@ -138,14 +138,14 @@ CommandReturn::status BUTool::RegisterHelper::Write(std::vector<std::string> str
 
 
 
-static void ReplaceStringInPlace(std::string& subject, std::string const& search,
-				 std::string const & replace) {
-  size_t pos = 0;
-  while ((pos = subject.find(search, pos)) != std::string::npos) {
-    subject.replace(pos, search.length(), replace);
-    pos += replace.length();
-  }
-}
+//static void ReplaceStringInPlace(std::string& subject, std::string const& search,
+//				 std::string const & replace) {
+//  size_t pos = 0;
+//  while ((pos = subject.find(search, pos)) != std::string::npos) {
+//    subject.replace(pos, search.length(), replace);
+//    pos += replace.length();
+//  }
+//}
 
 std::vector<std::string> BUTool::RegisterHelper::RegNameRegexSearch(std::string regex)
 {
@@ -155,14 +155,14 @@ std::vector<std::string> BUTool::RegisterHelper::RegNameRegexSearch(std::string 
   // convert regex so "." is literal, "*" matches any string
   // "perl:" prefix leaves regex unchanged
   ReCase(regex);
-  if( regex.size() > 6 && regex.substr(0,5) == "PERL:") {
-    printf("Using PERL-style regex unchanged\n");
-    regex = regex.substr( 5);
-  } else {
-    ReplaceStringInPlace( regex, ".", "#");
-    ReplaceStringInPlace( regex, "*",".*");
-    ReplaceStringInPlace( regex, "#","\\.");
-  }  
+//  if( regex.size() > 6 && regex.substr(0,5) == "PERL:") {
+//    printf("Using PERL-style regex unchanged\n");
+//    regex = regex.substr( 5);
+//  } else {
+//    ReplaceStringInPlace( regex, ".", "#");
+//    ReplaceStringInPlace( regex, "*",".*");
+//    ReplaceStringInPlace( regex, "#","\\.");
+//  }  
   //Run the regex on the derived class's myMatchRegex
   return myMatchRegex(regex);
 }
