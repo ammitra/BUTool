@@ -40,11 +40,13 @@ void signal_handler(int sig){
     alarm(1);
     
     //cleanup line
+#ifdef LINE_CTRL_C
     rl_delete_text(0,rl_end);
     printf("\n");
-    //    rl_on_new_line();
-    rl_forced_update_display();
+    rl_on_new_line();
     rl_done=1;
+#endif
+    rl_forced_update_display();
     
   }else if (sig == SIGALRM){    
     //re-enable SIGINT capture

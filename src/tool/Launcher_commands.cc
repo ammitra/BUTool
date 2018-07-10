@@ -1,6 +1,7 @@
 #include "Launcher.hh"
 #include <boost/tokenizer.hpp>
 #include <stdio.h>  
+#include <inttypes.h>
 
 using namespace BUTool;
 
@@ -331,7 +332,7 @@ CommandReturn::status Launcher::SelectDevice(std::vector<std::string>,std::vecto
     if(iArg[0] < device.size()){
       activeDevice = iArg[0];
     }else{
-      printf("Error: %zu out of range (%zu)",iArg[0],device.size());
+      printf("Error: %" PRIu64 " out of range (%zu)",iArg[0],device.size());
     }
     return CommandReturn::OK;
   }

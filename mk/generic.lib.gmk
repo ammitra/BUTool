@@ -1,0 +1,100 @@
+# Generic Makefile for a shared object library
+
+# FIXME: This name synchronization won't work as expected when building
+# multiple pkgs with one Makefile, need to set both name and lib when doing so
+name?=$(lib)
+lib?=$(name)
+
+ccflags+=$($(name)_CCFLAGS) -fPIC
+libfile?=$(LIBDIR)/lib$(lib).so
+
+include generic.common.gmk
+
+libobjs:=$(patsubst %, $(OBJDIR)/%.o, $(sources_c) $(sources_cxx))
+
+#libincludedir?=$(INCDIR)/$(lib)
+libincludedir?=$(INCDIR)
+ifneq ($(INCSRCDIR),)
+libincsrcpref=$(INCSRCDIR)/
+endif
+ifneq ($(include),)
+incfiles=$(patsubst $(libincsrcpref)%,$(libincludedir)/%,$(include))
+else
+incfiles=
+endif
+
+$(name)_products:= $(incfiles)
+ifneq ($(libobjs),)
+$(name)_products+=$(libfile)
+endif
+
+# Use the plain C linker when no C++ sources are present
+ifeq ($(sources_cxx),)
+cclink=CC
+else
+cclink=CXX
+endif
+
+ifndef installrule
+define installrule
+ifneq ($(libobjs),)
+	cp $(libfile) $(DESTDIR)/$(PREFIX)/lib/
+endif
+ifneq ($(include),)
+	@mkdir -p $(DESTDIR)/$(PREFIX)/include/$(lib)
+	cp -r $(libincludedir)/* $(DESTDIR)/$(PREFIX)/include/$(lib)/ || true
+endif
+endef
+endif
+
+print:=echo '  '$(cclink)' (link)  -o' $$@
+cmd:=$($(cclink)) -o $$@ -shared $(libobjs) $(genLDFLAGS)
+
+$(libfile): ${pkg_libdirs}
+
+define rules
+
+$(libfile): $(libobjs)
+	@mkdir -p $$(dir $$@)
+	@$(print)
+	$(cmd) || (echo; echo;echo cmdline: $(cmd); exit 1)
+
+install_$(name):
+$(installrule)
+
+clean_$(name):
+	@rm -rf $($(name)_products)
+
+clean: clean_$(name)
+
+build_$(name): $($(name)_products)
+
+endef
+$(eval $(rules))
+undefine print
+undefine cmd
+
+define rule_includes
+# By "building" the header files (simply copying) we ensure that headers are consistent with built libraries;
+# Plugins SHOULD NOT be including headers directly from BUTool sources!  See env.sh.
+$(incfiles): $(libincludedir)/% : $(libincsrcpref)%
+	@mkdir -p $$(dir $$@)
+	@echo '  cp  ' $$<
+	@cp -r $$< $$@
+endef
+
+install_$(name):
+
+ifneq ($(incfiles),)
+$(eval $(rule_includes))
+endif
+
+#$(info incfiles=$(incfiles))
+#$(info libincludedir=$(libincludedir))
+#$(info $(patsubst $(libincludedir)/%,%,$(incfiles)))
+
+undefine installrule
+undefine rules
+undefine libname
+undefine name
+undefine lib

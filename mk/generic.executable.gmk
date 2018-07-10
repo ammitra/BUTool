@@ -14,21 +14,31 @@ $(name)_products:=$(exefile)
 
 # Use the plain C linker when no C++ sources are present
 ifeq ($(sources_cxx),)
-cclink=$(CC)
+cclink=CC
 else
-cclink=$(CXX)
+cclink=CXX
 endif
+
+cmd:=$($(cclink)) -o $$@ $(patsubst %, $(OBJDIR)/%.o, $(sources_c) $(sources_cxx)) $(genLDFLAGS)
+
+$(exefile): ${pkg_libdirs}
 
 define rules :=
 
 $(exefile): $(patsubst %, $(OBJDIR)/%.o, $(sources_c) $(sources_cxx)) $(patsubst %,$$(%_products),$(depends))
 	@mkdir -p $$(dir $$@)
-	$(cclink) -o $$@ $(patsubst %, $(OBJDIR)/%.o, $(sources_c) $(sources_cxx)) $(genLDFLAGS)
+	@echo '  '$(cclink)' (link)  ''-o' $$@
+	@(${cmd} || (STATUS=$$?; echo cmdline: ${cmd} ; exit $$STATUS))
 
 install_$(name): install_prepare $(exefile)
-	cp $(exefile) $(DESTDIR)/bin/
+	cp $(exefile) $(DESTDIR)/$(PREFIX)/bin/
 
-$(name): $($(name)_products)
+clean_$(name):
+	rm -f $($(name)_products)
+
+clean: clean_$(name)
+
+build_$(name): $($(name)_products)
 
 endef
 $(eval $(rules))

@@ -36,7 +36,7 @@ install: build
 	cp -r build/install/* $(PREFIX)/
 
 clean: $(PACKAGES_clean)
-	rm -rf $(MAKEOBJDIRPREFIX)
+	rm -rf $(MAKEOBJDIRPREFIX)	
 build: $(PACKAGES_build)
 
 .PHONY: build install $(PACKAGES_build) $(PACKAGES_clean)

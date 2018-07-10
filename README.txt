@@ -1,5 +1,5 @@
 ===============================================================================
-==BUTool
+==BUTool 
 ===============================================================================
 BUTool is a CLI tool used to interact with hardware built at the Boston University
 Electronics Design Facility.
@@ -9,25 +9,29 @@ Instructions on how to add plug-ins can be found on the BUTool wiki
 http://gauss.bu.edu/redmine/projects/butool/wiki/BUTool_Wiki
 
 ===============================================================================
-== Basic Build and Install instructions
+== Build instructions (linux native, this probably means you)
 ===============================================================================
-After checkout out the BUTool source:
+After checking out the BUTool source:
   $ ./setup.sh
   $ source env.sh
   $ make
 
 ===============================================================================
-== Advanded Build and Install instructions
+== Build and Install instructions (BU zynq petalinux builds)
 ===============================================================================
-  $ PREFIX=<path to eventual instalation directory on target system> ./setup.sh
-  $ source buildenv.sh
+After checking out the BUTool source:
+  $ PLATFORM=petalinux ./setup.sh
+  $ source env.sh
   $ make
-For installation to $PREFIX on same host:
   $ make install
-For installation to another host:
-  $ mkdir install
-  $ make install DESTDIR=./install
-  $ cp -r install/* <path to target filesystem>/$PREFIX/
+
+You may need to update env.sh to set the working prefix for current zynq projects
+You will have to change env.sh's MAKEFLAGS and PROJECT_ROOT directories for your checkout
+  $ source env.sh 
+  $ make
+  $ make install
+This will build the directory structure for the zynq in ./install/
+You should copy its contents to "/" on the zynq
 
 ===============================================================================
 == Bug/issue tracking: 

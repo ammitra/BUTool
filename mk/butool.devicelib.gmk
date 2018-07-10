@@ -1,6 +1,6 @@
 name?=$(device)
 libsubdir=BUTool/device
-libfile=$(MAKEOBJDIR)/lib/$(libsubdir)/$(device).so
+libfile=$(LIBDIR)/$(libsubdir)/$(device).so
 ldflags+=-lBUTool
 
 define installrule
