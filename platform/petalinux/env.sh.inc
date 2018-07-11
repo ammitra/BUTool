@@ -11,3 +11,5 @@ export CROSS_HOST=arm-xilinx-linux-gnueabi
 export MAKEOBJDIRPREFIX="$PROJECT_ROOT/obj"
 export DESTDIR="$PROJECT_ROOT/install"
 
+export BUTOOL_INSTALL_PATH=$DESTDIR
+export BUTOOL_LINK_PATH="$PREFIX"

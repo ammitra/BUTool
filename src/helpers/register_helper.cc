@@ -71,7 +71,7 @@ CommandReturn::status BUTool::RegisterHelper::Read(std::vector<std::string> strA
 
       //Print the address
       if(readNumber % lineWordCount == 0){
-	printf("%08x: ",  addr);
+	printf("0x%08x: ",  addr);
       }      
       //read the value
       uint64_t val = RegReadAddress(addr);
@@ -82,9 +82,9 @@ CommandReturn::status BUTool::RegisterHelper::Read(std::vector<std::string> strA
       }
       //Print the value if we are suppose to
       if(!skipPrintZero ||  (val != 0)){
-	printf(" %0*" PRIX64, printWord64?16:8, val);	
+	printf(" 0x%0*" PRIX64, printWord64?16:8, val);	
       }else{
-	printf(" %*s", printWord64?16:8," ");	
+	printf("   %*s", printWord64?16:8," ");	
       }
       //End line
       if(readNumber % lineWordCount == 0){
