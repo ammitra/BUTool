@@ -1,5 +1,5 @@
 
-CXXFLAGS+=-g -O0 -std=c++03 -Wall -Werror
+CXXFLAGS+=-g -O2 -std=c++03 -Wall -Werror
 #CPPFLAGS+=-Iexternal/include -I$(DESTDIR)/$(PREFIX)/include/edit
 CPPFLAGS+=-Iinclude
 
