@@ -1,5 +1,5 @@
-#include "CLIHelper.hh"
-#include "Launcher.hh"
+#include <BUTool/CLIHelper.hh>
+#include <BUTool/Launcher.hh>
 
 //gnu readline
 #include <readline/readline.h>

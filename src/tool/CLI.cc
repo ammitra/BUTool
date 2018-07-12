@@ -1,4 +1,4 @@
-#include "CLI.hh"
+#include <BUTool/CLI.hh>
 #include <wordexp.h> //needed for expanding "~/" and the like
 
 #include <sys/types.h> //for stat

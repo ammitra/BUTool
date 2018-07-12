@@ -5,11 +5,9 @@
 #include <sstream>
 #include <map>
 #include <stdint.h>
-#include "CommandReturn.hh"
-#include "CommandList.hh"
+#include <BUTool/CommandReturn.hh>
+#include <BUTool/CommandList.hh>
 
-//Devices
-//#include <devices/WIB/WIBDevice.hpp>
 
 namespace BUTool{
 

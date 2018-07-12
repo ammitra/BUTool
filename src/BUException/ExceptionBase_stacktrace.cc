@@ -1,4 +1,4 @@
-#include "ExceptionBase.hh"
+#include <BUException/ExceptionBase.hh>
   
 //Error string for stack string allocation error
 static const char stackError[] = "Stack allocation failed.\n";

@@ -19,6 +19,8 @@ libincsrcpref=$(INCSRCDIR)/
 endif
 ifneq ($(include),)
 incfiles=$(patsubst $(libincsrcpref)%,$(libincludedir)/%,$(include))
+
+
 else
 incfiles=
 endif
@@ -35,18 +37,30 @@ else
 cclink=CXX
 endif
 
+#################################################################################
+# Build install rule commands
+#################################################################################
 ifndef installrule
 define installrule
+#if $libojbs is defined
 ifneq ($(libobjs),)
 	cp $(libfile) $(DESTDIR)/$(PREFIX)/lib/
 endif
+#if $include is defined
 ifneq ($(include),)
-	@mkdir -p $(DESTDIR)/$(PREFIX)/include/$(lib)
-	cp -r $(libincludedir)/* $(DESTDIR)/$(PREFIX)/include/$(lib)/ || true
+	@mkdir -p $(DESTDIR)/$(PREFIX)/include/
+	cp -r $(libincludedir)/* $(DESTDIR)/$(PREFIX)/include/ || true
+#	@mkdir -p $(DESTDIR)/$(PREFIX)/include/$(lib)
+#	cp -r $(libincludedir)/* $(DESTDIR)/$(PREFIX)/include/$(lib)/ || true
 endif
 endef
 endif
+#################################################################################
 
+
+#################################################################################
+# Build rules
+#################################################################################
 print:=echo '  '$(cclink)' (link)  -o' $$@
 cmd:=$($(cclink)) -o $$@ -shared $(libobjs) $(genLDFLAGS)
 
@@ -57,7 +71,7 @@ define rules
 $(libfile): $(libobjs)
 	@mkdir -p $$(dir $$@)
 	@$(print)
-	$(cmd) || (echo; echo;echo cmdline: $(cmd); exit 1)
+	@$(cmd) || (echo; echo;echo cmdline: $(cmd); exit 1)
 
 install_$(name):
 $(installrule)
@@ -70,17 +84,34 @@ clean: clean_$(name)
 build_$(name): $($(name)_products)
 
 endef
+#################################################################################
+
+#################################################################################
+# load rules into make
+#################################################################################
 $(eval $(rules))
 undefine print
 undefine cmd
+#################################################################################
 
 define rule_includes
 # By "building" the header files (simply copying) we ensure that headers are consistent with built libraries;
 # Plugins SHOULD NOT be including headers directly from BUTool sources!  See env.sh.
+
+#check if this is a relative or absolute path, they are handled differently
+ifeq (,$(findstring ./,$(libincludedir)))
+#abolute path
 $(incfiles): $(libincludedir)/% : $(libincsrcpref)%
-	@mkdir -p $$(dir $$@)
-	@echo '  cp  ' $$<
+	@mkdir -p $$(dir $$@)	
+	@echo '  cp  ' $$< ' to ' $$@
 	@cp -r $$< $$@
+else
+#relative path
+$(incfiles): $(libincludedir)/% : include/$(libincsrcpref)%
+	@mkdir -p $$(dir $$@)	
+	@echo '  cp  ' $$< ' to ' $$@
+	@cp -r $$< $$@
+endif
 endef
 
 install_$(name):

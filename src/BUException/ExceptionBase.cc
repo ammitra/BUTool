@@ -1,4 +1,4 @@
-#include "ExceptionBase.hh"
+#include <BUException/ExceptionBase.hh>
 
 //Error string for bad allocation of description
 static const char descriptionError[] = "Description allocation failed.\n";

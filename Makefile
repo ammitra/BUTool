@@ -13,14 +13,15 @@ include package.gmk
 
 name=BUException
 lib=BUException
-include=include/BUException
+#include=include/BUException
+include=BUException
 sources_cxx=$(wildcard src/BUException/*.cc)
 include generic.lib.gmk
 
 name=BUTool_lib
 lib=BUTool
 ldflags=-lBUException
-include=include/BUTool
+include=BUTool
 sources_cxx=$(wildcard src/tool/*.cc src/helpers/*.cc src/helpers/StatusDisplay/*.cc src/g2quad_device/*.cc)
 include generic.lib.gmk
 
@@ -37,6 +38,6 @@ cleaninst:
 	@rm -rf ./install >& /dev/null
 
 
-pkg_name=butool
+#pkg_name=butool
 
 

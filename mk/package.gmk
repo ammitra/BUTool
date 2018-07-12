@@ -84,6 +84,7 @@ endef
 #################################################################################
 
 #geneerate rules from above
+#$(info package.gmk $(rules))
 $(eval $(rules))
 
 pkg_libpath:

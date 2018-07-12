@@ -5,11 +5,11 @@
 #include <ctype.h> // for isDigit()
 #include <sstream> //string streamer
 
-#include "helpers/StatusDisplay/StatusDisplay.hh"
-#include "helpers/StatusDisplay/StatusDisplayMatrix.hh"
-#include "helpers/StatusDisplay/StatusDisplayCell.hh"
+#include <BUTool/helpers/StatusDisplay/StatusDisplay.hh>
+#include <BUTool/helpers/StatusDisplay/StatusDisplayMatrix.hh>
+#include <BUTool/helpers/StatusDisplay/StatusDisplayCell.hh>
 
-#include "ToolException.hh"
+#include <BUTool/ToolException.hh>
 
 //For PRI macros
 #define __STDC_FORMAT_MACROS

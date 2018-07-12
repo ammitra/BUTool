@@ -8,10 +8,10 @@
 #define __STDC_FORMAT_MACROS
 #include <inttypes.h>
 
-#include "helpers/StatusDisplay/StatusDisplayMatrix.hh"
-#include "helpers/StatusDisplay/StatusDisplayCell.hh"
+#include <BUTool/helpers/StatusDisplay/StatusDisplayMatrix.hh>
+#include <BUTool/helpers/StatusDisplay/StatusDisplayCell.hh>
 
-#include "ToolException.hh"
+#include <BUTool/ToolException.hh>
 
 
 namespace BUTool{

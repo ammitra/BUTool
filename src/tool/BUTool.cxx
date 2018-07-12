@@ -6,17 +6,17 @@
 
 //TCLAP parser
 #include <tclap/CmdLine.h>
-#include "Launcher.hh"
-#include "CLI.hh"
-#include "CommandReturn.hh"
-#include "DeviceFactory.hh"
+#include <BUTool/Launcher.hh>
+#include <BUTool/CLI.hh>
+#include <BUTool/CommandReturn.hh>
+#include <BUTool/DeviceFactory.hh>
 
 #include <BUException/ExceptionBase.hh>
 
 #include <readline/readline.h> //for rl_delete_text
 #include <signal.h> //signals
 
-#include "helpers/parseHelpers.hh"
+#include <BUTool/helpers/parseHelpers.hh>
 
 #define BUTOOL_AUTOLOAD_LIBRARY_LIST "BUTOOL_AUTOLOAD_LIBRARY_LIST"
 
