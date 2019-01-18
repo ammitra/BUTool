@@ -103,9 +103,9 @@ void BUException::exBase::Append(const char * buffer) throw()
     }
     
   //Append the new string (n keeps us safe from buffer overflow)
-  strncpy(descriptionBuffer+descriptionUsed,
-	  buffer,
-	  appendedSize);
+  memcpy(descriptionBuffer+descriptionUsed,
+	 buffer,
+	 appendedSize);
     
   //update the description size
   descriptionUsed += appendedSize;

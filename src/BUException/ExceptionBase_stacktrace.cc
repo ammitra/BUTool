@@ -15,13 +15,13 @@ void BUException::exBase::AppendStackLine(const char * line) throw()
   //Check for NULL line
   if(line == NULL)
     return;
-    
+
   //get raw line size
   size_t lineSize = strlen(line);
   if(lineSize >= (stackSize - stackUsed))
     lineSize = stackSize - stackUsed;
   //copy string
-  strncpy(stackBuffer+stackUsed,line,lineSize);
+  memcpy(stackBuffer+stackUsed,line,lineSize); 
   //update size
   stackUsed += lineSize;
   //Add eol
