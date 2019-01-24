@@ -21,14 +21,23 @@ endef
 # =======
 export sourcecheck
 
-# ======= buildenv
+# ======= buildenv base
 define buildenv
 export PLATFORM="$(PLATFORM)"
 export PREFIX="$(PREFIX)"
-export MAKEFLAGS="-I $(PWD)/mk"
 export PROJECT_ROOT="$(PROJECT_ROOT)"
 endef
 
+# ======= buildenv append MAKEFLAGS
+ifdef SET_MAKEFLAGS
+define buildenv +=
+
+export MAKEFLAGS="-I $(PWD)/mk"
+endef
+endif
+
+
+# ======= buildenv append LIBDIR
 ifneq ($(LIBDIR),)
 define buildenv +=
 
@@ -36,6 +45,7 @@ export LIBDIR="$(LIBDIR)"
 endef
 endif
 
+# ======= buildenv append BINDIR
 ifneq ($(BINDIR),)
 define buildenv +=
 
@@ -43,14 +53,14 @@ export BINDIR="$(BINDIR)"
 endef
 endif
 
-# =======
+# ======= buildenv (run)
 export buildenv
 
 # ======= runenv
 define runenv
 export PATH="$$PATH:$(PREFIX)/bin"
 endef
-# =======
+# ======= runenv (run)
 export runenv
 
 .DEFAULT_GOAL=env.sh

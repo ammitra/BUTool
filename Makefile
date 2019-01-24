@@ -13,7 +13,6 @@ include package.gmk
 
 name=BUException
 lib=BUException
-#include=include/BUException
 include=BUException
 sources_cxx=$(wildcard src/BUException/*.cc)
 include generic.lib.gmk
