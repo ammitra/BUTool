@@ -6,6 +6,21 @@
 #define __STDC_FORMAT_MACROS
 #include <inttypes.h> //for PRI
 
+std::vector<uint32_t> BUTool::RegisterHelper::RegReadAddressFIFO(uint32_t addr,size_t count){
+  //placeholder for fifo read
+  std::vector<uint32_t> ret;
+  uint32_t addrEnd = addr + uint32_t(count);
+  for(;addr < addrEnd;addr++){
+    ret.push_back(RegReadAddress(addr)); 
+  }
+  return ret;
+}
+std::vector<uint32_t> BUTool::RegisterHelper::RegReadRegisterFIFO(std::string const & reg,size_t count){
+  uint32_t address = GetRegAddress(reg);
+  return RegReadAddressFIFO(address,count);
+}
+
+
 void BUTool::RegisterHelper::ReCase(std::string & name){
   switch(regCase){
   case LOWER:
@@ -21,9 +36,46 @@ void BUTool::RegisterHelper::ReCase(std::string & name){
   }
 }
 
+void BUTool::RegisterHelper::PrintRegAddressRange(uint32_t startAddress,size_t readCount,bool printWord64 ,bool skipPrintZero){
+
+  uint32_t addr_incr = printWord64 ? 2 : 1;
+  uint32_t readNumber = 0;
+  uint32_t lineWordCount = printWord64 ? 4 : 8;
+
+  //Use the RegBlockReadRegister
+
+  for(uint32_t addr = startAddress; addr < (startAddress + readCount*addr_incr);addr+=addr_incr){
+
+    //Print the address
+    if(readNumber % lineWordCount == 0){
+      printf("0x%08x: ",  addr);
+    }      
+    //read the value
+    uint64_t val = RegReadAddress(addr);
+    readNumber++;
+    if(printWord64){
+      //Grab the upper bits if we are base 64
+      val |= (uint64_t(RegReadAddress(addr+1)) << 32);
+    }
+    //Print the value if we are suppose to
+    if(!skipPrintZero ||  (val != 0)){
+      printf(" 0x%0*" PRIX64, printWord64?16:8, val);	
+    }else{
+      printf("   %*s", printWord64?16:8," ");	
+    }
+    //End line
+    if(readNumber % lineWordCount == 0){
+      printf("\n");
+    }
+  }
+  //final end line
+  printf("\n");
+
+}
+
 CommandReturn::status BUTool::RegisterHelper::Read(std::vector<std::string> strArg,
 						   std::vector<uint64_t> intArg){
-  // sort out arguments                                                                                       
+  // sort out arguments
   size_t readCount = 1;
   std::string flags("");
   bool numericAddr = true;
@@ -63,42 +115,22 @@ CommandReturn::status BUTool::RegisterHelper::Read(std::vector<std::string> strA
   bool skipPrintZero    = (flags.find("N") != std::string::npos);
 
   if(numericAddr){
-    uint32_t addr_incr = printWord64 ? 2 : 1;
-    uint32_t readNumber = 0;
-    uint32_t lineWordCount = printWord64 ? 4 : 8;
-
-    for(uint32_t addr = intArg[0]; addr < (intArg[0] + readCount*addr_incr);addr+=addr_incr){
-
-      //Print the address
-      if(readNumber % lineWordCount == 0){
-	printf("0x%08x: ",  addr);
-      }      
-      //read the value
-      uint64_t val = RegReadAddress(addr);
-      readNumber++;
-      if(printWord64){
-	//Grab the upper bits if we are base 64
-	val |= (uint64_t(RegReadAddress(addr+1)) << 32);
-      }
-      //Print the value if we are suppose to
-      if(!skipPrintZero ||  (val != 0)){
-	printf(" 0x%0*" PRIX64, printWord64?16:8, val);	
-      }else{
-	printf("   %*s", printWord64?16:8," ");	
-      }
-      //End line
-      if(readNumber % lineWordCount == 0){
-	printf("\n");
-      }
-    }
-    //final end line
-    printf("\n");
+    PrintRegAddressRange(intArg[0],readCount,printWord64,skipPrintZero);
   } else {
     std::vector<std::string> names = RegNameRegexSearch(strArg[0]);
     for(size_t iName = 0; iName < names.size();iName++){
-      uint32_t val = RegReadRegister(names[iName]);
-      if(!skipPrintZero || (val != 0)){
-	printf("%50s: 0x%08X\n",names[iName].c_str(),val);
+      if(readCount == 1){
+	//normal printing
+	uint32_t val = RegReadRegister(names[iName]);
+	if(!skipPrintZero || (val != 0)){
+	  printf("%50s: 0x%08X\n",names[iName].c_str(),val);
+	}
+      }else{
+	//switch to numeric printing because of count
+	uint32_t address = GetRegAddress(names[iName]);
+	printf("%s:\n",names[iName].c_str());
+	PrintRegAddressRange(address,readCount,printWord64,skipPrintZero);
+	printf("\n");
       }
     }
   }
@@ -150,19 +182,7 @@ CommandReturn::status BUTool::RegisterHelper::Write(std::vector<std::string> str
 std::vector<std::string> BUTool::RegisterHelper::RegNameRegexSearch(std::string regex)
 {
   // return a list of nodes matching regular expression
-
-  //THis wrapper function creates a common framework for the regex syntax
-  // convert regex so "." is literal, "*" matches any string
-  // "perl:" prefix leaves regex unchanged
   ReCase(regex);
-//  if( regex.size() > 6 && regex.substr(0,5) == "PERL:") {
-//    printf("Using PERL-style regex unchanged\n");
-//    regex = regex.substr( 5);
-//  } else {
-//    ReplaceStringInPlace( regex, ".", "#");
-//    ReplaceStringInPlace( regex, "*",".*");
-//    ReplaceStringInPlace( regex, "#","\\.");
-//  }  
   //Run the regex on the derived class's myMatchRegex
   return myMatchRegex(regex);
 }

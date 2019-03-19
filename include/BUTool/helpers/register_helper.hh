@@ -17,11 +17,21 @@ namespace BUTool{
     RegisterHelper(RegisterNameCase _regCase){regCase = _regCase;}
 
     virtual std::vector<std::string> myMatchRegex(std::string regex)=0;
+    
+    //reads
     virtual uint32_t RegReadAddress(uint32_t addr)=0;
     virtual uint32_t RegReadRegister(std::string const & reg)=0;
-    virtual void RegWriteAction(std::string const & reg)=0;
+    virtual std::vector<uint32_t> RegReadAddressFIFO(uint32_t addr,size_t count);
+    virtual std::vector<uint32_t> RegReadRegisterFIFO(std::string const & reg,size_t count);
+    //    virtual std::vector<uint32_t> RegBlockReadAddress(uint32_t addr,size_t count);
+    //    virtual std::vector<uint32_t> RegBlockReadRegister(std::string const & reg,size_t count);
+
+    //writes
     virtual void RegWriteAddress(uint32_t addr,uint32_t data)=0;
     virtual void RegWriteRegister(std::string const & reg, uint32_t data)=0;
+
+    //action writes
+    virtual void RegWriteAction(std::string const & reg)=0;
 
     virtual uint32_t GetRegAddress(std::string const & reg)=0;
     virtual uint32_t GetRegMask(std::string const & reg)=0;
@@ -29,8 +39,8 @@ namespace BUTool{
     virtual std::string GetRegMode(std::string const & reg)=0;
     virtual std::string GetRegPermissions(std::string const & reg)=0;
     virtual std::string GetRegDescription(std::string const & reg)=0;
-    virtual std::string GetRegDebug(std::string const & reg){(void) reg; return "";}; // casting reg to void to keep comiler from complaining about unused var
-    virtual std::string GetRegHelp(std::string const & reg){(void) reg; return "";}; // casting reg to void to keep comiler from complaining about unused var
+    virtual std::string GetRegDebug(std::string const & /*reg*/){return "";}; 
+    virtual std::string GetRegHelp(std::string const & /*reg*/){return "";};
 
 
 
@@ -51,6 +61,7 @@ namespace BUTool{
 
   private:
     RegisterNameCase regCase;
+    void PrintRegAddressRange(uint32_t startAddress,size_t readCount,bool printWord64 ,bool skipPrintZero);
   };
 
 }
