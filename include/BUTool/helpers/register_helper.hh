@@ -29,6 +29,10 @@ namespace BUTool{
     //writes
     virtual void RegWriteAddress(uint32_t addr,uint32_t data)=0;
     virtual void RegWriteRegister(std::string const & reg, uint32_t data)=0;
+    virtual void RegWriteAddressFIFO(uint32_t addr,std::vector<uint32_t> const & data);
+    virtual void RegWriteRegisterFIFO(std::string const & reg, std::vector<uint32_t> const & data);
+    virtual void RegBlockWriteAddress(uint32_t addr,std::vector<uint32_t> const & data);
+    virtual void RegBlockWriteRegister(std::string const & reg, std::vector<uint32_t> const & data);
 
     //action writes
     virtual void RegWriteAction(std::string const & reg)=0;
@@ -55,6 +59,8 @@ namespace BUTool{
     CommandReturn::status ReadFIFO(std::vector<std::string> strArg,std::vector<uint64_t> intArg);
     CommandReturn::status ReadOffset(std::vector<std::string> strArg,std::vector<uint64_t> intArg);
     CommandReturn::status Write(std::vector<std::string> strArg,std::vector<uint64_t> intArg);
+    CommandReturn::status WriteFIFO(std::vector<std::string> strArg,std::vector<uint64_t> intArg);
+    CommandReturn::status WriteOffset(std::vector<std::string> strArg,std::vector<uint64_t> intArg);
     CommandReturn::status ListRegs(std::vector<std::string> strArg,std::vector<uint64_t> intArg);
     std::string RegisterAutoComplete(std::vector<std::string> const &,std::string const &,int);
 

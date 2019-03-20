@@ -39,9 +39,51 @@ std::vector<uint32_t> BUTool::RegisterHelper::RegBlockReadAddress(uint32_t addr,
   return ret;
 }
 std::vector<uint32_t> BUTool::RegisterHelper::RegBlockReadRegister(std::string const & reg,size_t count){
+  //=============================================================================
+  //placeholder for block read
+  //These should be overloaded if the firmware/software natively supports these features
+  //=============================================================================
   uint32_t address = GetRegAddress(reg);
   return RegBlockReadAddress(address,count);
 }
+
+void BUTool::RegisterHelper::RegWriteAddressFIFO(uint32_t addr,std::vector<uint32_t> const & data){
+  //=============================================================================
+  //placeholder for fifo write
+  //These should be overloaded if the firmware/software natively supports these features
+  //=============================================================================
+  for(size_t i = 0; i < data.size();i++){
+    RegWriteAddress(addr,data[i]);
+  }
+}
+void BUTool::RegisterHelper::RegWriteRegisterFIFO(std::string const & reg, std::vector<uint32_t> const & data){
+  //=============================================================================
+  //placeholder for fifo write
+  //These should be overloaded if the firmware/software natively supports these features
+  //=============================================================================
+  for(size_t i = 0; i < data.size();i++){
+    RegWriteRegister(reg,data[i]);
+  }
+}
+void BUTool::RegisterHelper::RegBlockWriteAddress(uint32_t addr,std::vector<uint32_t> const & data){
+  //=============================================================================
+  //placeholder for block write
+  //These should be overloaded if the firmware/software natively supports these features
+  //=============================================================================
+  for(size_t i =0;i < data.size();i++){
+    RegWriteAddress(addr,data[i]);
+    addr++;
+  }
+}
+void BUTool::RegisterHelper::RegBlockWriteRegister(std::string const & reg, std::vector<uint32_t> const & data){
+  //=============================================================================
+  //placeholder for block write
+  //These should be overloaded if the firmware/software natively supports these features
+  //=============================================================================
+  uint32_t addr = GetRegAddress(reg);
+  RegBlockWriteAddress(addr,data);
+}
+
 
 
 
@@ -259,26 +301,121 @@ CommandReturn::status BUTool::RegisterHelper::Write(std::vector<std::string> str
   }
   std::string saddr = strArg[0];
   ReCase(saddr);
-  
+  bool isNumericAddress = isdigit( saddr.c_str()[0]); 
+  uint32_t count = 1;
+
   switch( strArg.size()) {
   case 1:			// address only means Action(masked) write
     printf("Mask write to %s\n", saddr.c_str() );
     RegWriteAction(saddr);
-    break;
-  case 2:
-    printf("Write to ");
-    if( isdigit( saddr.c_str()[0])) {
-      printf("address %s\n", saddr.c_str() );
-      RegWriteAddress(intArg[0],uint32_t(intArg[1]));
-    } else {
-      printf("register %s\n", saddr.c_str());
-      RegWriteRegister(saddr,uint32_t(intArg[1]));
+    return CommandReturn::OK;
+  case 3:                       // We have a count
+    if(! isdigit(strArg[2][0])){
+      return CommandReturn::BAD_ARGS;
+    }
+    count = intArg[2];
+  case 2:                       //data to write
+    //Data must be a number
+    if(!isdigit(strArg[1][0])){
+      return CommandReturn::BAD_ARGS;
     }
     break;
   default:
     return CommandReturn::BAD_ARGS;
   }	
 
+  printf("Write to ");
+  if(isNumericAddress ) {
+    if(1 == count){
+      printf("address 0x%08X\n", uint32_t(intArg[0]) );
+      RegWriteAddress(uint32_t(intArg[0]),uint32_t(intArg[1]));    
+    }else{
+      std::vector<uint32_t> data(count,uint32_t(intArg[1]));
+      printf("address 0x%08X to 0x%08X\n", uint32_t(intArg[0]), uint32_t(intArg[0])+count );
+      RegBlockWriteAddress(uint32_t(intArg[0]),data);
+    }
+    
+  } else {
+    if(1 == count){
+      printf("register %s\n", saddr.c_str());
+      RegWriteRegister(saddr,uint32_t(intArg[1]));
+    }else{
+      std::vector<uint32_t> data(count,uint32_t(intArg[1]));
+      uint32_t address = GetRegAddress(strArg[0]);
+      printf("address 0x%08X to 0x%08X\n", address, address+count );
+      RegBlockWriteAddress(address,data);
+    }
+  }
+
+  return CommandReturn::OK;
+}
+
+CommandReturn::status BUTool::RegisterHelper::WriteOffset(std::vector<std::string> strArg,std::vector<uint64_t> intArg){
+  if(strArg.size() >= 2){
+    //check that argument 2 is a number
+    if(isdigit(strArg[1][0])){
+      uint32_t offset = intArg[1];
+      //remove argument 2
+      strArg.erase(strArg.begin()+1);
+      intArg.erase(intArg.begin()+1);
+  
+      if(isdigit(strArg[0][0])){
+	//numeric address
+	if(0 != offset){
+	  printf("Addr 0x%08X + 0x%08X\n",uint32_t(intArg[0]),offset);
+	}
+	//Numeric address, just update it. 
+	strArg[0] = "0"; //make it a number
+	intArg[0] += offset;
+	return Write(strArg,intArg);
+      }else{
+	//String address, convert to a numeric address 
+	if(0 != offset){
+	  printf("Addr %s + 0x%08X\n",strArg[0].c_str(),offset);
+	}
+	uint32_t addr = GetRegAddress(strArg[0]);
+	strArg[0] = "0"; //make it a number 
+	intArg[0] = addr + offset;
+	return Write(strArg,intArg);
+      }
+      
+    }
+  }
+  return CommandReturn::BAD_ARGS;  
+}
+
+
+CommandReturn::status BUTool::RegisterHelper::WriteFIFO(std::vector<std::string> strArg,std::vector<uint64_t> intArg){
+  uint32_t count = 1;
+  uint32_t dataVal;
+  
+  switch(strArg.size()){
+  case 3:
+    //Count, must be a number
+    if(isdigit(strArg[2][0])){
+      count = intArg[2];
+    }else{
+      return CommandReturn::BAD_ARGS;
+    }
+  case 2:
+    if(!isdigit(strArg[1][0])){
+      return CommandReturn::BAD_ARGS;
+    }
+    dataVal = intArg[1];
+    break;
+  default:
+    return CommandReturn::BAD_ARGS;
+  }
+
+  //create the data
+  std::vector<uint32_t> data(count,dataVal);
+
+  //Check if the address is name or number
+  if(isdigit(strArg[0][0])){
+    RegWriteAddressFIFO(intArg[0],data);
+  }else{
+    RegWriteRegisterFIFO(strArg[0],data);
+  }
   return CommandReturn::OK;
 }
 
