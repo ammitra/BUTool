@@ -23,8 +23,8 @@ namespace BUTool{
     virtual uint32_t RegReadRegister(std::string const & reg)=0;
     virtual std::vector<uint32_t> RegReadAddressFIFO(uint32_t addr,size_t count);
     virtual std::vector<uint32_t> RegReadRegisterFIFO(std::string const & reg,size_t count);
-    //    virtual std::vector<uint32_t> RegBlockReadAddress(uint32_t addr,size_t count);
-    //    virtual std::vector<uint32_t> RegBlockReadRegister(std::string const & reg,size_t count);
+    virtual std::vector<uint32_t> RegBlockReadAddress(uint32_t addr,size_t count);
+    virtual std::vector<uint32_t> RegBlockReadRegister(std::string const & reg,size_t count);
 
     //writes
     virtual void RegWriteAddress(uint32_t addr,uint32_t data)=0;
@@ -52,6 +52,8 @@ namespace BUTool{
     void ReCase(std::string & name);
 
     CommandReturn::status Read(std::vector<std::string> strArg,std::vector<uint64_t> intArg);
+    CommandReturn::status ReadFIFO(std::vector<std::string> strArg,std::vector<uint64_t> intArg);
+    CommandReturn::status ReadOffset(std::vector<std::string> strArg,std::vector<uint64_t> intArg);
     CommandReturn::status Write(std::vector<std::string> strArg,std::vector<uint64_t> intArg);
     CommandReturn::status ListRegs(std::vector<std::string> strArg,std::vector<uint64_t> intArg);
     std::string RegisterAutoComplete(std::vector<std::string> const &,std::string const &,int);
@@ -61,7 +63,8 @@ namespace BUTool{
 
   private:
     RegisterNameCase regCase;
-    void PrintRegAddressRange(uint32_t startAddress,size_t readCount,bool printWord64 ,bool skipPrintZero);
+    void PrintRegAddressRange(uint32_t startAddress,std::vector<uint32_t> const & data,bool printWord64 ,bool skipPrintZero);
+    CommandReturn::status ReadWithOffsetHelper(uint32_t offset,std::vector<std::string> strArg,std::vector<uint64_t> intArg);
   };
 
 }

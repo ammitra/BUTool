@@ -7,7 +7,30 @@
 #include <inttypes.h> //for PRI
 
 std::vector<uint32_t> BUTool::RegisterHelper::RegReadAddressFIFO(uint32_t addr,size_t count){
+  //=============================================================================
   //placeholder for fifo read
+  //These should be overloaded if the firmware/software natively supports these features
+  //=============================================================================
+  std::vector<uint32_t> ret;
+  for(size_t iRead = 0; iRead < count; iRead++){
+    ret.push_back(RegReadAddress(addr)); 
+  }
+  return ret;
+}
+std::vector<uint32_t> BUTool::RegisterHelper::RegReadRegisterFIFO(std::string const & reg,size_t count){
+  //=============================================================================
+  //placeholder for fifo read
+  //These should be overloaded if the firmware/software natively supports these features
+  //=============================================================================
+  uint32_t address = GetRegAddress(reg);
+  return RegReadAddressFIFO(address,count);
+}
+
+std::vector<uint32_t> BUTool::RegisterHelper::RegBlockReadAddress(uint32_t addr,size_t count){
+  //=============================================================================
+  //placeholder for block read
+  //These should be overloaded if the firmware/software natively supports these features
+  //=============================================================================
   std::vector<uint32_t> ret;
   uint32_t addrEnd = addr + uint32_t(count);
   for(;addr < addrEnd;addr++){
@@ -15,10 +38,11 @@ std::vector<uint32_t> BUTool::RegisterHelper::RegReadAddressFIFO(uint32_t addr,s
   }
   return ret;
 }
-std::vector<uint32_t> BUTool::RegisterHelper::RegReadRegisterFIFO(std::string const & reg,size_t count){
+std::vector<uint32_t> BUTool::RegisterHelper::RegBlockReadRegister(std::string const & reg,size_t count){
   uint32_t address = GetRegAddress(reg);
-  return RegReadAddressFIFO(address,count);
+  return RegBlockReadAddress(address,count);
 }
+
 
 
 void BUTool::RegisterHelper::ReCase(std::string & name){
@@ -36,11 +60,13 @@ void BUTool::RegisterHelper::ReCase(std::string & name){
   }
 }
 
-void BUTool::RegisterHelper::PrintRegAddressRange(uint32_t startAddress,size_t readCount,bool printWord64 ,bool skipPrintZero){
 
+void BUTool::RegisterHelper::PrintRegAddressRange(uint32_t startAddress,std::vector<uint32_t> const & data,bool printWord64 ,bool skipPrintZero){
+  
   uint32_t addr_incr = printWord64 ? 2 : 1;
   uint32_t readNumber = 0;
   uint32_t lineWordCount = printWord64 ? 4 : 8;
+  uint32_t readCount = data.size();
 
   //Use the RegBlockReadRegister
 
@@ -51,11 +77,11 @@ void BUTool::RegisterHelper::PrintRegAddressRange(uint32_t startAddress,size_t r
       printf("0x%08x: ",  addr);
     }      
     //read the value
-    uint64_t val = RegReadAddress(addr);
+    uint64_t val = data[readNumber];
     readNumber++;
     if(printWord64){
       //Grab the upper bits if we are base 64
-      val |= (uint64_t(RegReadAddress(addr+1)) << 32);
+      val |= (uint64_t(data[readNumber]) << 32);
     }
     //Print the value if we are suppose to
     if(!skipPrintZero ||  (val != 0)){
@@ -70,24 +96,46 @@ void BUTool::RegisterHelper::PrintRegAddressRange(uint32_t startAddress,size_t r
   }
   //final end line
   printf("\n");
-
 }
 
 CommandReturn::status BUTool::RegisterHelper::Read(std::vector<std::string> strArg,
 						   std::vector<uint64_t> intArg){
+  //Call the print with offset code with a zero offset
+  return ReadWithOffsetHelper(0,strArg,intArg);
+}
+
+CommandReturn::status BUTool::RegisterHelper::ReadOffset(std::vector<std::string> strArg,std::vector<uint64_t> intArg){
+  if(strArg.size() >= 2){
+    //check that argument 2 is a number
+    if(isdigit(strArg[1][0])){
+      uint32_t offset = intArg[1];
+      //remove argument 2
+      strArg.erase(strArg.begin()+1);
+      intArg.erase(intArg.begin()+1);
+      return ReadWithOffsetHelper(offset,strArg,intArg);
+    }
+  }
+  return CommandReturn::BAD_ARGS;
+}
+
+
+
+CommandReturn::status BUTool::RegisterHelper::ReadWithOffsetHelper(uint32_t offset,std::vector<std::string> strArg,std::vector<uint64_t> intArg){
   // sort out arguments
   size_t readCount = 1;
   std::string flags("");
   bool numericAddr = true;
 
   switch( strArg.size() ) {
-  case 0:                     // no arguments is an error                                                     
+  case 0:                     // no arguments is an error
+    //===================================
     return CommandReturn::BAD_ARGS;
-  case 3:                     // third is flags                                                               
+  case 3:                     // third is flags
+    //===================================
     flags = strArg[2];
-
-    // fall through to others                                                                                 
-  case 2:                     // second is either count or flags                                              
+    // fall through to others
+  case 2:                     // second is either count or flags
+    //===================================
     if( isdigit( strArg[1].c_str()[0])){
       readCount = intArg[1];
     } else if(2 == strArg.size()){
@@ -98,13 +146,14 @@ CommandReturn::status BUTool::RegisterHelper::Read(std::vector<std::string> strA
       //This is a non-digit second argument of a three argument.
       return CommandReturn::BAD_ARGS;
     }
-
-    // fall through to address                                                                                
-  case 1:                     // one must be an address                                                       
+    // fall through to address
+  case 1:                     // one must be an address
+    //===================================
     numericAddr = isdigit( strArg[0].c_str()[0]);
     ReCase(strArg[0]);
     break;
   default:
+    //===================================
     printf("Too many arguments after command\n");
     return CommandReturn::BAD_ARGS;
   }
@@ -113,29 +162,94 @@ CommandReturn::status BUTool::RegisterHelper::Read(std::vector<std::string> strA
   boost::algorithm::to_upper(flags);
   bool printWord64      = (flags.find("D") != std::string::npos);
   bool skipPrintZero    = (flags.find("N") != std::string::npos);
+  //Scale the read count by two if we are doing 64 bit reads
+  size_t finalReadCount = printWord64 ? 2*readCount : readCount; 
 
+
+  //DO the read(s) and the printing
+  std::vector<uint32_t> readData;    //Vector if we need to read multiple words
   if(numericAddr){
-    PrintRegAddressRange(intArg[0],readCount,printWord64,skipPrintZero);
+    //Do the read
+    if(1 == readCount){
+      readData.push_back(RegReadAddress(intArg[0]+offset));
+    }else{
+      readData = RegBlockReadAddress(intArg[0]+offset,finalReadCount);
+    }
+    //Print the read data
+    if(0 != offset){
+      printf("Applying offset 0x%08X to 0x%08X\n",offset,uint32_t(intArg[0]));
+    }
+    PrintRegAddressRange(intArg[0]+offset,readData,printWord64,skipPrintZero);
   } else {
     std::vector<std::string> names = RegNameRegexSearch(strArg[0]);
     for(size_t iName = 0; iName < names.size();iName++){
-      if(readCount == 1){
+      if(1 == readCount){
 	//normal printing
-	uint32_t val = RegReadRegister(names[iName]);
-	if(!skipPrintZero || (val != 0)){
-	  printf("%50s: 0x%08X\n",names[iName].c_str(),val);
+	if(0 == offset){
+	  uint32_t val = RegReadRegister(names[iName]);
+	  if(!skipPrintZero || (val != 0)){
+	    printf("%50s: 0x%08X\n",names[iName].c_str(),val);
+	  }	  
+	}else{
+	  uint32_t address = GetRegAddress(names[iName]);
+	  uint32_t val = RegReadAddress(address+offset);
+	  if(!skipPrintZero || (val != 0)){
+	    printf("%50s + 0x%08X: 0x%08X\n",names[iName].c_str(),offset,val);
+	  }	  	  
 	}
       }else{
 	//switch to numeric printing because of count
-	uint32_t address = GetRegAddress(names[iName]);
-	printf("%s:\n",names[iName].c_str());
-	PrintRegAddressRange(address,readCount,printWord64,skipPrintZero);
+	uint32_t address = GetRegAddress(names[iName])+offset;
+	if(0 == offset){
+	  printf("%s:\n",names[iName].c_str());
+	}else{
+	  printf("%s + 0x%08X:\n",names[iName].c_str(),offset);
+	}
+	readData = RegBlockReadAddress(address,finalReadCount);
+	PrintRegAddressRange(address,readData,printWord64,skipPrintZero);
 	printf("\n");
       }
     }
   }
   return CommandReturn::OK;
 }
+
+
+CommandReturn::status BUTool::RegisterHelper::ReadFIFO(std::vector<std::string> strArg,std::vector<uint64_t> intArg){
+  // sort out arguments
+  size_t readCount = 1;
+  bool numericAddr = true;
+
+  if(strArg.size() == 2){
+    //Check if this is a numeric address or a named register
+    if(! isdigit( strArg[0].c_str()[0])){    
+      numericAddr = false;
+    }
+    //Get read count
+    if(isdigit( strArg[1].c_str()[0])){    
+      readCount = intArg[1];
+    }else{
+      //bad count
+      return CommandReturn::BAD_ARGS;
+    }
+  }else{
+    //bad arguments
+    return CommandReturn::BAD_ARGS;
+  }
+  
+  std::vector<uint32_t> data;
+  if(numericAddr){
+    data = RegReadAddressFIFO(intArg[0],readCount);
+    printf("Read %zu words from 0x%08X:\n",data.size(),uint32_t(intArg[0]));
+  }else{
+    data = RegReadRegisterFIFO(strArg[0],readCount);
+    printf("Read %zu words from %s:\n",data.size(),strArg[0].c_str());
+  }
+  PrintRegAddressRange(0,data,false,false);
+  return CommandReturn::OK;
+}
+
+
 
 CommandReturn::status BUTool::RegisterHelper::Write(std::vector<std::string> strArg,
 						    std::vector<uint64_t> intArg) {
@@ -170,14 +284,6 @@ CommandReturn::status BUTool::RegisterHelper::Write(std::vector<std::string> str
 
 
 
-//static void ReplaceStringInPlace(std::string& subject, std::string const& search,
-//				 std::string const & replace) {
-//  size_t pos = 0;
-//  while ((pos = subject.find(search, pos)) != std::string::npos) {
-//    subject.replace(pos, search.length(), replace);
-//    pos += replace.length();
-//  }
-//}
 
 std::vector<std::string> BUTool::RegisterHelper::RegNameRegexSearch(std::string regex)
 {
@@ -261,6 +367,7 @@ CommandReturn::status BUTool::RegisterHelper::ListRegs(std::vector<std::string> 
   }
   return CommandReturn::OK;
 }
+
 
 
 std::string BUTool::RegisterHelper::RegisterAutoComplete(std::vector<std::string> const & line , std::string const & currentToken,int state){
