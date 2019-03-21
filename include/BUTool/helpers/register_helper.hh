@@ -19,8 +19,8 @@ namespace BUTool{
     virtual std::vector<std::string> myMatchRegex(std::string regex)=0;
     
     //reads
-    virtual uint32_t RegReadAddress(uint32_t addr)=0;
-    virtual uint32_t RegReadRegister(std::string const & reg)=0;
+    virtual uint32_t              RegReadAddress(uint32_t addr)=0;
+    virtual uint32_t              RegReadRegister(std::string const & reg)=0;
     virtual std::vector<uint32_t> RegReadAddressFIFO(uint32_t addr,size_t count);
     virtual std::vector<uint32_t> RegReadRegisterFIFO(std::string const & reg,size_t count);
     virtual std::vector<uint32_t> RegBlockReadAddress(uint32_t addr,size_t count);
@@ -37,9 +37,9 @@ namespace BUTool{
     //action writes
     virtual void RegWriteAction(std::string const & reg)=0;
 
-    virtual uint32_t GetRegAddress(std::string const & reg)=0;
-    virtual uint32_t GetRegMask(std::string const & reg)=0;
-    virtual uint32_t GetRegSize(std::string const & reg)=0;
+    virtual uint32_t    GetRegAddress(std::string const & reg)=0;
+    virtual uint32_t    GetRegMask(std::string const & reg)=0;
+    virtual uint32_t    GetRegSize(std::string const & reg)=0;
     virtual std::string GetRegMode(std::string const & reg)=0;
     virtual std::string GetRegPermissions(std::string const & reg)=0;
     virtual std::string GetRegDescription(std::string const & reg)=0;
