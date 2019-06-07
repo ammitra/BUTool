@@ -1,6 +1,7 @@
 #include <BUTool/Launcher.hh>
 #include <boost/tokenizer.hpp>
 #include <stdio.h>  
+#define __STDC_FORMAT_MACROS
 #include <inttypes.h>
 
 using namespace BUTool;
