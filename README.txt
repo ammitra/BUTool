@@ -8,31 +8,35 @@ hardware.
 Instructions on how to add plug-ins can be found on the BUTool wiki
 http://gauss.bu.edu/redmine/projects/butool/wiki/BUTool_Wiki
 
+
+===============================================================================
+== Common pre-req's
+===============================================================================
+boost-devel
+readline-devel
+ld
+
 ===============================================================================
 == Build instructions (linux native, this probably means you)
 ===============================================================================
 After checking out the BUTool source:
-  $ ./setup.sh
-  $ source env.sh
+  $cp make/Makefile.x86 ./Makefile
   $ make
+  $ source env.sh
+  $ BUTool.exe
 
 ===============================================================================
 == Build and Install instructions (BU zynq petalinux builds)
 ===============================================================================
 After checking out the BUTool source:
-  $ PLATFORM=petalinux ./setup.sh
-  $ source env.sh
+  $ cp make/Makefile.zynq ./Makefile
+  $ mount "project_path"/os/zynq_os/images/linux/rootfs.ext4 /mnt
   $ make
-  $ make install
 
-You may need to update env.sh to set the working prefix for current zynq projects
-You will have to change env.sh's MAKEFLAGS and PROJECT_ROOT directories for your checkout
-  $ source env.sh 
-  $ make
-  $ make install
-This will build the directory structure for the zynq in ./install/
-You should copy its contents to "/" on the zynq
+Then copy "env.sh", ./bin, and ./lib to /work on the zynq system. 
+Afer sourcing env.sh on the zynq, you can call BUTool.exe
 
+If you want to mount the zynq image someplace else, please modify the COMPILETIME_ROOT variable in the makefile to point to where you mounted the code
 ===============================================================================
 == Bug/issue tracking: 
 ===============================================================================

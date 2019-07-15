@@ -1,5 +1,7 @@
 #PackagePath = $(shell pwd)
 
+#x86 linux
+CXX=g++
 RUNTIME_LDPATH=${PWD}
 
 #Exception class
@@ -39,10 +41,11 @@ LIBRARY_PATH +=-L$(BOOST_LIB)
 endif
 
 LIBRARIES =    	-lToolException	\
-		-lreadline 			\
-		-lcurses 			\
-		-lz 				\
-		-lboost_regex
+		-lreadline 	\
+		-lcurses 	\
+		-lz 		\
+		-lboost_regex 	\
+		-ldl
 
 
 
@@ -53,14 +56,13 @@ EXECUTABLE_LINKED_LIBRARY_FLAGS = $(patsubst lib%,-l%,$(patsubst %.so,%,$(notdir
 EXECUTABLE_LIBRARIES = ${LIBRARIES} ${EXECUTABLE_LINKED_LIBRARY_FLAGS} 
 
 
-CPP_FLAGS = -g -O3 -rdynamic -Wall -MMD -MP -fPIC ${INCLUDE_PATH} -Werror -Wno-literal-suffix
+CXX_FLAGS = -g -O3 -rdynamic -Wall -MMD -MP -fPIC ${INCLUDE_PATH} -Werror -Wno-literal-suffix
 
-#CPP_FLAGS += -std=c++11 -fno-omit-frame-pointer -pedantic -Wno-ignored-qualifiers -Werror=return-type -Wextra -Wno-long-long -Winit-self -Wno-unused-local-typedefs  -Woverloaded-virtual -Wimplicit-fallthrough=2 
-CPP_FLAGS += -std=c++11 -fno-omit-frame-pointer -pedantic -Wno-ignored-qualifiers -Werror=return-type -Wextra -Wno-long-long -Winit-self -Wno-unused-local-typedefs  -Woverloaded-virtual
+CXX_FLAGS += -std=c++11 -fno-omit-frame-pointer -pedantic -Wno-ignored-qualifiers -Werror=return-type -Wextra -Wno-long-long -Winit-self -Wno-unused-local-typedefs  -Woverloaded-virtual ${COMPILETIME_ROOT} ${FALLTHROUGH_FLAGS}
 
-LINK_LIBRARY_FLAGS = -shared -fPIC -Wall -g -O3 -rdynamic ${LIBRARY_PATH} ${LIBRARIES}
+LINK_LIBRARY_FLAGS = -shared -fPIC -Wall -g -O3 -rdynamic ${LIBRARY_PATH} ${LIBRARIES} ${COMPILETIME_ROOT}
 
-LINK_EXECUTABLE_FLAGS = -Wall -g -O3 -rdynamic ${LIBRARY_PATH} ${EXECUTABLE_LIBRARIES} -Wl,-rpath=${RUNTIME_LDPATH}/lib
+LINK_EXECUTABLE_FLAGS = -Wall -g -O3 -rdynamic ${LIBRARY_PATH} ${EXECUTABLE_LIBRARIES} -Wl,-rpath=${RUNTIME_LDPATH}/lib ${COMPILETIME_ROOT}
 
 
 
@@ -85,11 +87,11 @@ _all: ${EXECUTABLE_LINKED_LIBRARIES} ${LIBRARY_HELPERS} ${LIBRARY_TOOL}  ${EXECU
 # ------------------------
 ${LIBRARY_EXCEPTION}: ${LIBRARY_EXCEPTION_OBJECT_FILES}
 	mkdir -p $(dir $@)
-	g++ -shared -fPIC -Wall -g -O3 -rdynamic ${LIBRARY_EXCEPTION_OBJECT_FILES} -o $@
+	${CXX} -shared -fPIC -Wall -g -O3 -rdynamic ${LIBRARY_EXCEPTION_OBJECT_FILES} -o $@
 
 ${LIBRARY_EXCEPTION_OBJECT_FILES}: obj/%.o : src/%.cc 
 	mkdir -p $(dir $@)
-	g++ ${CPP_FLAGS} -c $< -o $@
+	${CXX} ${CXX_FLAGS} -c $< -o $@
 
 
 # ------------------------
@@ -97,11 +99,11 @@ ${LIBRARY_EXCEPTION_OBJECT_FILES}: obj/%.o : src/%.cc
 # ------------------------
 ${EXECUTABLES}: bin/%.exe: obj/%.o ${EXECUTABLE_OBJECT_FILES}  ${LIBRARY_TOOL}  ${EXECUTABLE_LINKED_LIBRARIES} ${LIBRARY_HELPERS}
 	mkdir -p $(dir $@)
-	g++ ${LINK_EXECUTABLE_FLAGS} $< -o $@
+	${CXX} ${LINK_EXECUTABLE_FLAGS} $< -o $@
 
 ${EXECUTABLE_OBJECT_FILES}: obj/%.o : src/%.cxx
 	mkdir -p $(dir $@)
-	g++ -c ${CPP_FLAGS}  $< -o $@
+	${CXX} -c ${CXX_FLAGS}  $< -o $@
 
 -include $(EXECUTABLE_OBJECT_FILES:.o=.d)
 
@@ -110,22 +112,22 @@ ${EXECUTABLE_OBJECT_FILES}: obj/%.o : src/%.cxx
 # ------------------------
 ${LIBRARY_TOOL}: ${LIBRARY_TOOL_OBJECT_FILES} ${LIBRARY_EXCEPTION}
 	mkdir -p $(dir $@)
-	g++ ${LINK_LIBRARY_FLAGS} ${LIBRARY_TOOL_OBJECT_FILES} -o $@
+	${CXX} ${LINK_LIBRARY_FLAGS} ${LIBRARY_TOOL_OBJECT_FILES} -o $@
 
 ${LIBRARY_TOOL_OBJECT_FILES}: obj/%.o : src/%.cc 
 	mkdir -p $(dir $@)
-	g++ ${CPP_FLAGS} -c $< -o $@
+	${CXX} ${CXX_FLAGS} -c $< -o $@
 
 # ------------------------
 # helpers library
 # ------------------------
 ${LIBRARY_HELPERS}: ${LIBRARY_HELPERS_OBJECT_FILES} ${LIBRARY_EXCEPTION}
 	mkdir -p $(dir $@)
-	g++ ${LINK_LIBRARY_FLAGS} ${LIBRARY_HELPERS_OBJECT_FILES} -o $@
+	${CXX} ${LINK_LIBRARY_FLAGS} ${LIBRARY_HELPERS_OBJECT_FILES} -o $@
 
 ${LIBRARY_HELPERS_OBJECT_FILES}: obj/%.o : src/%.cc 
 	mkdir -p $(dir $@)
-	g++ ${CPP_FLAGS} ${UHAL_CPP_FLAGHS} -c $< -o $@
+	${CXX} ${CXX_FLAGS} ${UHAL_CXX_FLAGHS} -c $< -o $@
 
 -include $(LIBRARY_OBJECT_FILES:.o=.d)
 
