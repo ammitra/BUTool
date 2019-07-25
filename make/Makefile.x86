@@ -1,8 +1,11 @@
-#PackagePath = $(shell pwd)
+BUTOOL_PATH=$(shell pwd)
+BUILD_MODE = x86
 
 #x86 linux
 CXX=g++
 RUNTIME_LDPATH=${PWD}
+
+export
 
 #Exception class
 LIBRARY_EXCEPTION = lib/libToolException.so
@@ -26,6 +29,8 @@ LIBRARY_WIBDEVICE_OBJECT_FILES = $(patsubst src/%.cc,obj/%.o,${LIBRARY_WIBDEVICE
 EXECUTABLE_SOURCES = $(wildcard src/tool/*.cxx)
 EXECUTABLE_OBJECT_FILES = $(patsubst src/%.cxx,obj/%.o,${EXECUTABLE_SOURCES})
 EXECUTABLES = $(patsubst src/%.cxx,bin/%.exe,${EXECUTABLE_SOURCES})
+
+PLUGIN_DIR=plugins/
 
 INCLUDE_PATH = \
 							-Iinclude  
@@ -67,7 +72,7 @@ LINK_EXECUTABLE_FLAGS = -Wall -g -O3 -rdynamic ${LIBRARY_PATH} ${EXECUTABLE_LIBR
 
 
 
-.PHONY: all _all clean _cleanall build _buildall
+.PHONY: all _all clean _cleanall build _buildall self plugin 
 
 default: build
 clean: _cleanall
@@ -75,12 +80,14 @@ _cleanall:
 	rm -rf obj
 	rm -rf bin
 	rm -rf lib
+	make -C ${PLUGIN_DIR} clean
 
 
 all: _all
 build: _all
 buildall: _all
-_all: ${EXECUTABLE_LINKED_LIBRARIES} ${LIBRARY_HELPERS} ${LIBRARY_TOOL}  ${EXECUTABLES} 
+_all: self plugin 
+self: ${EXECUTABLE_LINKED_LIBRARIES} ${LIBRARY_HELPERS} ${LIBRARY_TOOL}  ${EXECUTABLES} 
 
 # ------------------------
 # exception library
@@ -131,3 +138,11 @@ ${LIBRARY_HELPERS_OBJECT_FILES}: obj/%.o : src/%.cc
 
 -include $(LIBRARY_OBJECT_FILES:.o=.d)
 
+# -----------------------
+# make plug-ins 
+# -----------------------
+
+FLAGS = $(ifeq $(MAKEFLAGS) "","",-$(MAKEFLAGS))
+
+plugin:
+	 ${MAKE} ${FLAGS} -C ${PLUGIN_DIR} 
