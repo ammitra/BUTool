@@ -8,7 +8,7 @@ PLUGINS=$(wildcard */Makefile)
 PLUGIN_TARGETS=$(patsubst %/Makefile,%,${PLUGINS})
 PLUGIN_CLEAN=$(addsuffix clean ,${PLUGIN_TARGETS})
 
-.PHONY: all _all clean ${PLUGINS} ${PLUGIN_CLEAN} 
+.PHONY: all _all clean ${PLUGIN_TARGETS} ${PLUGIN_CLEAN} 
 
 default: build
 clean: _cleanall
