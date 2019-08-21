@@ -20,7 +20,7 @@ namespace BUTool{
   class StatusDisplay{
   public:
     StatusDisplay();
-
+    virtual ~StatusDisplay(){};
 
     void ReportHeader(std::ostream & stream) const;
     std::string ReportHeader() const;
