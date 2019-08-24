@@ -1,6 +1,5 @@
-
-
-
+#SEARCH_PATHS = $(find ../ -path "../*src" -o -path "../*include")
+SEARCH_PATHS = "INPUT="$(wildcard  ../*src  ../*include ../*/*/src ../*/*/include)
 .PHONY: doc clean
 
 all: doc
@@ -11,6 +10,7 @@ clean:
 
 doc :
 	@echo "Generating doxygen"
-	@doxygen ./BUTool.cfg
+#	@echo ${SEARCH_PATHS}
+	@(cat ./BUTool.cfg ; echo ${SEARCH_PATHS}) | doxygen -
 
 
