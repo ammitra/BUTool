@@ -1,7 +1,0 @@
-MAKEOBJDIR?=./obj
-
-OBJDIR?=${MAKEOBJDIR}
-
-LIBDIR?=${OBJDIR}/lib
-BINDIR?=${OBJDIR}/bin
-INCDIR?=${OBJDIR}/include

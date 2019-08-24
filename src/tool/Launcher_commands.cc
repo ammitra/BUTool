@@ -1,6 +1,7 @@
 #include <BUTool/Launcher.hh>
 #include <boost/tokenizer.hpp>
 #include <stdio.h>  
+#define __STDC_FORMAT_MACROS
 #include <inttypes.h>
 
 using namespace BUTool;
@@ -144,7 +145,7 @@ CommandReturn::status Launcher::Help(std::vector<std::string> strArg,std::vector
   if(activeDevice >= 0){
     itActiveDevice = device.begin()+activeDevice;
     if(itActiveDevice != device.end()){  
-      deviceCommandList = (*itActiveDevice)->GetCommandList();      
+      deviceCommandList = (*itActiveDevice)->GetCommandList();
     }
   }
 
@@ -157,23 +158,48 @@ CommandReturn::status Launcher::Help(std::vector<std::string> strArg,std::vector
       } else {
 	//We want a per command full help
 	
-	//Search Launcher commands
-	if(commandList.find(strArg[0]) != commandList.end()){
-	  //We have a launcher command
-	  HelpPrinter(strArg[0],
-		      commandList[strArg[0]],
-		      GetHelp(strArg[0]),
-		      true);
-	  return CommandReturn::OK;
-	}else if(deviceCommandList.find(strArg[0]) != deviceCommandList.end()){
-	  //We have a device command
-	  HelpPrinter(strArg[0],
-		      deviceCommandList[strArg[0]],
-		      (*itActiveDevice)->GetHelp(strArg[0]),
-		      true);
-	  return CommandReturn::OK;
-	  
+	// Search Launcher commands and aliases
+	// Iterate over all Launcher commands
+	for(std::map<std::string,std::vector<std::string> >::iterator it = commandList.begin();
+	    it != commandList.end();
+	    it++){
+	  // Iterate over all aliases of each Launcher command and the command itself
+	  for(std::vector<std::string>::iterator itAlias = it->second.begin();
+	      itAlias != it->second.end();
+	      itAlias++){
+	    if(0 == strArg[0].compare(*itAlias)) {
+	      // We found a matching Launcher command alias for the command: it->first
+	      std::string foundCommand = it->first;
+		HelpPrinter(foundCommand,
+			    commandList[foundCommand],
+			    GetHelp(foundCommand),
+			    true);
+		return CommandReturn::OK;
+	    }
+	  }
 	}
+	
+	// Search device commands and aliases
+	// Iterate over all device commands
+	for(std::map<std::string,std::vector<std::string> >::iterator it = deviceCommandList.begin();
+	    it != deviceCommandList.end();
+	    it++){
+	  // Iterate over all aliases of each device command and the command itself
+	  for(std::vector<std::string>::iterator itAlias = it->second.begin();
+	      itAlias != it->second.end();
+	      itAlias++){
+	    if(0 == strArg[0].compare(*itAlias)) {
+	      // We found a matching device command alias for the command: it->first
+	      std::string foundCommand = it->first;
+		HelpPrinter(foundCommand,
+			    deviceCommandList[foundCommand],
+			    (*itActiveDevice)->GetHelp(foundCommand),
+			    true);
+		return CommandReturn::OK;
+	    }
+	  }
+	}
+
       }
     }	
   }
@@ -234,7 +260,7 @@ std::string Launcher::autoComplete_Help(std::vector<std::string> const & line,st
     if((line.size() > 1) && (currentToken.size() == 0)){
       return std::string("");
     }
-
+   
     static std::vector<std::string> commandName;
     static size_t iCommand;
 
