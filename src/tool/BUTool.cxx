@@ -315,9 +315,9 @@ int main(int argc, char* argv[])
 				   errorstr.end(), 
 				   '\n'), 
 		       errorstr.end());
-	
-	std::cout << "\n\n\nCaught std::exception " << errorstr << ". Shutting down.\n";
-	running = false;
+	std::cout << "\n\n\nCaught std::exception " << errorstr << ".\n";
+	//std::cout << "\n\n\nCaught std::exception " << errorstr << ". Shutting down.\n";
+	//running = false;
 	cli.ClearInput(); //Clear any scripted commands
       }
     }
