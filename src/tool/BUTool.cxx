@@ -163,9 +163,9 @@ int main(int argc, char* argv[])
 
   
   try {
-    TCLAP::CmdLine cmd("Tool for talking to AMC13 modules.",
+    TCLAP::CmdLine cmd("Tool for talking to HW modules.",
 		       ' ',
-		       "AMC13Tool v2");
+		       "BUTool v1.0");
     
     //Script files
     TCLAP::ValueArg<std::string> scriptFile("X",              //one char flag
