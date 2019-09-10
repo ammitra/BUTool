@@ -119,14 +119,14 @@ namespace BUTool{
     // Now any post-amble
     if (statusMode == LATEX) {
       stream << "\\section{Version}" << "\n";
-      stream << "Using svn version: " << version << ".\n";
+      stream << "Using SW version: " << version << ".\n";
       stream << "\\end{document}\n";
     } else if(statusMode == HTML){
       //Display the svn version for this release
-      stream << "<table><tr><td>SVN</td><td>" << version << "</td></tr></table>\n";
+      stream << "<table><tr><td>SW:</td><td>" << version << "</td></tr></table>\n";
       stream << "</body></html>\n";
     } else if (statusMode == TEXT) {
-      stream << "SVN: " << version << "\n";
+      stream << "SW VER: " << version << "\n";
     }  
   }
 

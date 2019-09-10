@@ -9,8 +9,11 @@ ssh-copy-id $zynq
 
 scp $LIBS $zynq:/work/lib
 
+#BUTool bins
 scp -r ./bin/* $zynq:/work/bin
 
+#Apollo bins
+scp -r ./plugins/*/bin/* $zynq:/work/bin
 
 
 rm -f temp.env
