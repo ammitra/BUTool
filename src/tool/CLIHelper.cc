@@ -5,7 +5,9 @@
 #include <readline/readline.h>
 #include <readline/history.h>
 
-namespace BUTool{
+#include <BUTool/helpers/parseHelpers.hh>
+
+namespace BUTool {
 
   //Auto-completing state variables
   static Launcher * launcher;
@@ -18,28 +20,7 @@ namespace BUTool{
 
   std::vector<std::string> SplitString(std::string command)
   {
-    std::vector<std::string> commandArgv;
-    while(!command.empty())
-      {
-	//Find first split char
-	size_t pos = command.find(' ');
-	if(pos != std::string::npos)
-	  {
-	    //Add this string to our list
-	    commandArgv.push_back(command.substr(0,pos));
-	    //Remove it from the command
-	    command = command.substr(pos+1,std::string::npos);
-	  }
-	else
-	  {
-	    //This is the last command, so add it to the list
-	    commandArgv.push_back(command);
-	    //Empty the string
-	    command.clear();
-	  }
-      }
-    //return this command
-    return commandArgv;
+    return splitString(command," ");
   }
 
   //Set launcher state

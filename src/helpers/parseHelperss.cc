@@ -18,7 +18,15 @@ std::vector<std::string> splitString(std::string const & line,
   for(boost::tokenizer<boost::char_separator<char> >::iterator itTok = tokenizedFormat.begin();
       itTok != tokenizedFormat.end();
       itTok++){
-    ret.push_back(*itTok);
+    std::string token = *itTok;
+    size_t pos;
+    //Remove any spaces at the beginning of the token
+    while((pos = token.find(' ')) != std::string::npos){
+      token.erase(token.begin()+pos);
+    }
+    if(!token.empty()){
+      ret.push_back(token);
+    }
   }
   return ret;
 }

@@ -2,18 +2,22 @@
 LIBS=$(find -L ./ | grep "lib.*\.so")
 ENVS=$(find -L ./ | grep "env\.sh" | grep -v "doc")
 
-#zynq=root@192.168.30.12
-zynq=root@192.168.30.62
+${ZYNQ_IP:?ZYNQ_IP=192.168.30.12}
+#if [ ! -z "$ZYNQ_IP" ]; then
+#    ZYNQ_IP=192.168.30.12
+#fi
 
-ssh-copy-id $zynq
+echo "Copying to ${ZYNQ_IP}"
 
-scp $LIBS $zynq:/work/lib
+ssh-copy-id root@${ZYNQ_IP}
+
+scp $LIBS root@${ZYNQ_IP}:/work/lib
 
 #BUTool bins
-scp -r ./bin/* $zynq:/work/bin
+scp -r ./bin/* root@${ZYNQ_IP}:/work/bin
 
 #Apollo bins
-scp -r ./plugins/*/bin/* $zynq:/work/bin
+scp -r ./plugins/*/bin/* root@${ZYNQ_IP}:/work/bin
 
 
 rm -f temp.env
@@ -23,5 +27,5 @@ do
     cat $file >> temp.env
 done
 echo "PATH=\$PATH:\$PWD/bin/tool" >> temp.env
-scp temp.env $zynq:/work/env.sh
+scp temp.env root@${ZYNQ_IP}:/work/env.sh
 rm temp.env
