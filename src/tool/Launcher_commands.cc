@@ -127,20 +127,18 @@ void Launcher::HelpPrinter(std::string const &commandName,
     }
   }  
 }
-CommandReturn::status Launcher::Help(std::vector<std::string> strArg,std::vector<uint64_t> intArg) 
+CommandReturn::status Launcher::Help(std::vector<std::string> strArg,std::vector<uint64_t> /*intArg*/) 
 {
   //Check the arguments to see if we are looking for
   //  simple help:    all commands listed with 1-line help
   //  specific help:  full help for one command
   //  full help:      full help for all commands
   
-  (void) intArg; // Makes compiler not complain about unused arg
-
   //Get a list of commands from Launcher
   std::map<std::string,std::vector<std::string> > commandList = GetCommandList();
   //Get a list of commands from the active device
   std::map<std::string,std::vector<std::string> > deviceCommandList;
-  //  std::vector<DeviceContainer *>::iterator itActiveDevice = device.begin()+activeDevice;  
+
   std::vector<CommandListBase *>::iterator itActiveDevice = device.end();
   if(activeDevice >= 0){
     itActiveDevice = device.begin()+activeDevice;
@@ -163,18 +161,29 @@ CommandReturn::status Launcher::Help(std::vector<std::string> strArg,std::vector
 	for(std::map<std::string,std::vector<std::string> >::iterator it = commandList.begin();
 	    it != commandList.end();
 	    it++){
-	  // Iterate over all aliases of each Launcher command and the command itself
-	  for(std::vector<std::string>::iterator itAlias = it->second.begin();
-	      itAlias != it->second.end();
-	      itAlias++){
-	    if(0 == strArg[0].compare(*itAlias)) {
-	      // We found a matching Launcher command alias for the command: it->first
-	      std::string foundCommand = it->first;
+	  //check if this is the command
+	  if(0 == strArg[0].compare(it->first)) {
+	    // We found a matching Launcher command alias for the command: it->first
+	    std::string foundCommand = it->first;
+	    HelpPrinter(foundCommand,
+			commandList[foundCommand],
+			GetHelp(foundCommand),
+			true);
+	    return CommandReturn::OK;
+	  }else{
+	    // Iterate over all aliases of each Launcher command and the command itself
+	    for(std::vector<std::string>::iterator itAlias = it->second.begin();
+		itAlias != it->second.end();
+		itAlias++){
+	      if(0 == strArg[0].compare(*itAlias)) {
+		// We found a matching Launcher command alias for the command: it->first
+		std::string foundCommand = it->first;
 		HelpPrinter(foundCommand,
 			    commandList[foundCommand],
 			    GetHelp(foundCommand),
 			    true);
 		return CommandReturn::OK;
+	      }
 	    }
 	  }
 	}
@@ -184,22 +193,33 @@ CommandReturn::status Launcher::Help(std::vector<std::string> strArg,std::vector
 	for(std::map<std::string,std::vector<std::string> >::iterator it = deviceCommandList.begin();
 	    it != deviceCommandList.end();
 	    it++){
-	  // Iterate over all aliases of each device command and the command itself
-	  for(std::vector<std::string>::iterator itAlias = it->second.begin();
-	      itAlias != it->second.end();
-	      itAlias++){
-	    if(0 == strArg[0].compare(*itAlias)) {
-	      // We found a matching device command alias for the command: it->first
-	      std::string foundCommand = it->first;
+
+	  //check if this is the command
+	  if(0 == strArg[0].compare(it->first)) {
+	    // We found a matching Launcher command alias for the command: it->first
+	    std::string foundCommand = it->first;
+	    HelpPrinter(foundCommand,
+			deviceCommandList[foundCommand],
+			(*itActiveDevice)->GetHelp(foundCommand),
+			true);
+	    return CommandReturn::OK;
+	  }else{
+	    // Iterate over all aliases of each device command and the command itself
+	    for(std::vector<std::string>::iterator itAlias = it->second.begin();
+		itAlias != it->second.end();
+		itAlias++){
+	      if(0 == strArg[0].compare(*itAlias)) {
+		// We found a matching device command alias for the command: it->first
+		std::string foundCommand = it->first;
 		HelpPrinter(foundCommand,
 			    deviceCommandList[foundCommand],
 			    (*itActiveDevice)->GetHelp(foundCommand),
 			    true);
 		return CommandReturn::OK;
+	      }
 	    }
 	  }
-	}
-
+	}	
       }
     }	
   }
