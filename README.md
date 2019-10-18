@@ -47,6 +47,7 @@ The following variables will be passed on to plugin Makefiles:
 * RUNTIME_LDPATH
 * COMPILETIME_ROOT
 * FALLTHROUGH_FLAGS
+
 Plugins can use these variables to build with the same settings as BUTool,
 e.g. deciding whether building for linux native or for zynq petalinux
 
