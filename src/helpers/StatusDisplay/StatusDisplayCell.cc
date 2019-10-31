@@ -160,37 +160,49 @@ namespace BUTool{
     //Build the format string for snprintf
     std::string fmtString("%");
     if((format.size() > 1) && (('t' == format[0]) || ('T' == format[0]))){      
-      boost::char_separator<char> sep(",");
-      std::string workingString = format.substr(2);
-      boost::tokenizer<boost::char_separator<char> > tokenizedFormat(workingString,sep);
-      //      snprintf(buffer,strlen(buffer)," ");
-      uint64_t regValue = ComputeValue();
-      
-      for(boost::tokenizer<boost::char_separator<char> >::iterator itTok = tokenizedFormat.begin();
-	  itTok != tokenizedFormat.end();
-	  ++itTok){
-	//check if this token contains a space
-//	if(itTok->find(' ') == std::string::npos){
-//	  BUException::BAD_VALUE e;
-//	  std::string error("Bad format option: ");
-//	  error += format;
-//	  e.Append(error.c_str());
-//	  throw e;
-//	}
-	//get the numeric value from the first part of this token
-	uint64_t numericValue = strtoul(itTok->substr(0,itTok->find(' ')).c_str(),NULL,0);
-	//printf("0x%016" PRIX64 " 0x%016" PRIX64 "\n",numericValue,regValue);
-	if(regValue == numericValue){
-	  //	  printf("0x%016" PRIX64 " 0x%016" PRIX64 " %s\n",numericValue,regValue,itTok->c_str());
-	  if('t' == format[0]){
-	    //Just format for 't'
-	    snprintf(buffer,bufferSize,"%s",itTok->substr(itTok->find(' ')+1).c_str());
-	  }else{
-	    //format and number in hex for 'T'
-	    snprintf(buffer,bufferSize,"%s (0x%" PRIX64 ")",itTok->substr(itTok->find(' ')+1).c_str(),regValue);
+      std::map<uint64_t,std::string> enumMap;
+      size_t iFormat = 1;
+      while(iFormat < format.size()){
+	if(format[iFormat] == '_'){
+	  //start parsing 
+	  uint64_t val = 0;
+	  for(size_t jFormat=++iFormat;jFormat <format.size();jFormat++){
+	    if((format[jFormat] == '_') || (jFormat == (format.size()-1))){
+	      //convert value to number
+	      if(jFormat == (format.size()-1)){
+		jFormat++;
+	      }
+	      val = strtoul(format.substr(iFormat,jFormat-iFormat).c_str(),NULL,0);	      
+	      iFormat = jFormat;
+	      break;
+	    }
 	  }
-	  break;
+	  for(size_t jFormat=++iFormat;jFormat <format.size();jFormat++){
+	    if((format[jFormat] == '_') || (jFormat == (format.size()-1))){
+	      //convert value to number
+	      if(jFormat == (format.size()-1)){
+		jFormat++;
+	      }
+	      enumMap[val] = format.substr(iFormat,jFormat-iFormat);
+	      iFormat = jFormat;
+	      break;
+	    }
+	  }
+	}else{
+	  iFormat++;
 	}
+      }
+      uint64_t regValue = ComputeValue();
+      if(enumMap.find(regValue) != enumMap.end()){
+	if('t' == format[0]){
+	  //Just format for 't'
+	  snprintf(buffer,bufferSize,"%s",enumMap[regValue].c_str());
+	}else{
+	  //format and number in hex for 'T'
+	  snprintf(buffer,bufferSize,"%s (0x%" PRIX64 ")",enumMap[regValue].c_str(),regValue);
+	}       
+      }else{
+	snprintf(buffer,bufferSize,"0x%" PRIX64 ")",regValue);
       }
     }else if((format.size() > 1) && (('m' == format[0]) || ('M' == format[0]))){      
       //Split the '_' separated values
