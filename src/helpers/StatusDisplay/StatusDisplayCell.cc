@@ -217,7 +217,7 @@ namespace BUTool{
 	      if(jFormat == (format.size()-1)){
 		jFormat++;
 	      }
-	      uint64_t val = strtoul(format.substr(iFormat,jFormat-iFormat).c_str(),NULL,0);
+	      uint64_t val = strtoull(format.substr(iFormat,jFormat-iFormat).c_str(),NULL,0);
 	      mathValues.push_back(val);
 	      iFormat = jFormat;
 	      break;
@@ -237,17 +237,22 @@ namespace BUTool{
       }
 
       //computer the value ((m * x) + b)      
-      double transformedValue = double(ComputeValue())*(double(mathValues[1])/double(mathValues[2])); //multiply by absolute value of m
+      double transformedValue = ComputeValue();
+      //multiply by absolute value of m
+      transformedValue *= double(mathValues[1]);
+      transformedValue /= double(mathValues[2]); 
       if(mathValues[0] == 0){
 	//apply sign of m
 	transformedValue *= -1;
       }
       
       double b = double(mathValues[4])/double(mathValues[5]);
-      if(mathValues[3] == 0){
-	b *= -1;
+      if(mathValues[3] != 0){
+	transformedValue += b;
+      }else{
+	transformedValue -= b;
       }
-      transformedValue += b;
+
       //print it
       snprintf(buffer,bufferSize,	       
 	       "%3.2f",transformedValue);
