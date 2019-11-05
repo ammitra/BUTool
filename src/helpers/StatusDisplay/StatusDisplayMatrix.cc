@@ -542,7 +542,8 @@ namespace BUTool{
 	      stream << "<td title=\"" << itMap->second->GetDesc()  << "\" class=\"" << tdClass << "\">" 
 		     << itMap->second->Print(colWidth[iCol],true) << "</td>";
 	    }else{
-	      stream << "<td title=\"" << itMap->second->GetDesc()  << "\" class=\"" << tdClass << "\">" << " " << "</td>";
+	      //    stream << "<td title=\"" << itMap->second->GetDesc()  << "\" class=\"" << tdClass << "\">" << " " << "</td>";
+	      stream << "<td title=\"" << itMap->second->GetDesc()  << "\">" << " " << "</td>";
 	    }
 	  }else{
 	    stream << "<td>" << " " << "</td>";
