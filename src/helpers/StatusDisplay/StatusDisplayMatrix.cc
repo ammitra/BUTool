@@ -536,8 +536,16 @@ namespace BUTool{
 	  std::map<std::string,StatusDisplayCell*>::const_iterator itMap = colMap.find(colName[iCol]);
 	  if(itMap != colMap.end()){
 	    //sets the class for the td element for determining its color
-	    std::string tdClass = (itMap->second->GetDesc().find("error") != std::string::npos ? "error" : "nonerror") ;
-	    tdClass = (itMap->second->Print(colWidth[iCol],true) == "0") ? "null" : tdClass; 
+	    std::string tdClass = "nonerror";
+	    if((itMap->second->GetDesc().find("error") != std::string::npos) && forceDisplay){
+	      tdClass = "error";
+	    }else if((itMap->second->GetDesc().find("warning") != std::string::npos) && forceDisplay){
+	      tdClass = "warning" ;
+	    }else{
+	      tdClass = "nonerror";
+	    }
+
+
 	    if(itMap->second->Display(status,forceDisplay)){
 	      stream << "<td title=\"" << itMap->second->GetDesc()  << "\" class=\"" << tdClass << "\">" 
 		     << itMap->second->Print(colWidth[iCol],true) << "</td>";

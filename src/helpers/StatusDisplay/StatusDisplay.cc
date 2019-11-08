@@ -85,7 +85,9 @@ namespace BUTool{
     if (statusMode == HTML) {
       std::string head_color = "lightblue";
       std::string cell_color = "lightgreen";
-      std::string err_color = "#FB412d"; //red                                                                                                                                                              
+      std::string err_color = "#FB412d"; //red
+      std::string warn = "#FFFF00"; //yellow                          
+         
       std::string null_color = "lightgrey";
       stream << "table { float: left; margin: 10px;}\n"; //Allows multiple tables on the same line with spacing                                                                                                                             
       stream << "th { font-size: smaller; background-color:" << head_color << ";}\n"; // Sets header font size and background color                                                                                                         
