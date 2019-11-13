@@ -30,11 +30,7 @@ _all:  ${PLUGIN_TARGETS}
 
 FLAGS = $(ifeq $(MAKEFLAGS) "","",-$(MAKEFLAGS))
 
--include Makefile.include
-#ApolloSM_plugin: BUTool-IPBUS-Helpers  
-#	 ${MAKE} ${FLAGS} -C $@ 
-#GenericIPBus_plugin: BUTool-IPBUS-Helpers  
-#	 ${MAKE} ${FLAGS} -C $@ 
+-include Makefile.plugins
 
 ${PLUGIN_TARGETS}:
 	 ${MAKE} ${FLAGS} -C $@ 
