@@ -27,5 +27,6 @@ do
     cat $file >> temp.env
 done
 echo "PATH=\$PATH:\$PWD/bin/tool" >> temp.env
+echo "export UHAL_ENABLE_IPBUS_MMAP=1" >> temp.env
 scp temp.env root@${ZYNQ_IP}:/work/env.sh
 rm temp.env

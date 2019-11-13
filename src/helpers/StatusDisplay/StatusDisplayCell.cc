@@ -160,41 +160,103 @@ namespace BUTool{
     //Build the format string for snprintf
     std::string fmtString("%");
     if((format.size() > 1) && (('t' == format[0]) || ('T' == format[0]))){      
-      //      printf("%s %s\n",format.c_str(),format.substr(2).c_str());
-      boost::char_separator<char> sep(",");
-      std::string workingString = format.substr(2);
-      boost::tokenizer<boost::char_separator<char> > tokenizedFormat(workingString,sep);
-      //      snprintf(buffer,strlen(buffer)," ");
-      uint64_t regValue = ComputeValue();
-      
-      for(boost::tokenizer<boost::char_separator<char> >::iterator itTok = tokenizedFormat.begin();
-	  itTok != tokenizedFormat.end();
-	  ++itTok){
-	//check if this token contains a space
-//	if(itTok->find(' ') == std::string::npos){
-//	  BUException::BAD_VALUE e;
-//	  std::string error("Bad format option: ");
-//	  error += format;
-//	  e.Append(error.c_str());
-//	  throw e;
-//	}
-	//	printf("%s\n",itTok->c_str());
-	//get the numeric value from the first part of this token
-	//	printf("\n\n%s        %s %s \n",itTok->c_str(),itTok->substr(0,itTok->find(' ')).c_str(),itTok->substr(itTok->find(' ')+1).c_str());
-	uint64_t numericValue = strtoul(itTok->substr(0,itTok->find(' ')).c_str(),NULL,0);
-	//printf("0x%016" PRIX64 " 0x%016" PRIX64 "\n",numericValue,regValue);
-	if(regValue == numericValue){
-	  //	  printf("0x%016" PRIX64 " 0x%016" PRIX64 " %s\n",numericValue,regValue,itTok->c_str());
-	  if('t' == format[0]){
-	    //Just format for 't'
-	    snprintf(buffer,bufferSize,"%s",itTok->substr(itTok->find(' ')+1).c_str());
-	  }else{
-	    //format and number in hex for 'T'
-	    snprintf(buffer,bufferSize,"%s (0x%" PRIX64 ")",itTok->substr(itTok->find(' ')+1).c_str(),regValue);
+      std::map<uint64_t,std::string> enumMap;
+      size_t iFormat = 1;
+      while(iFormat < format.size()){
+	if(format[iFormat] == '_'){
+	  //start parsing 
+	  uint64_t val = 0;
+	  for(size_t jFormat=++iFormat;jFormat <format.size();jFormat++){
+	    if((format[jFormat] == '_') || (jFormat == (format.size()-1))){
+	      //convert value to number
+	      if(jFormat == (format.size()-1)){
+		jFormat++;
+	      }
+	      val = strtoul(format.substr(iFormat,jFormat-iFormat).c_str(),NULL,0);	      
+	      iFormat = jFormat;
+	      break;
+	    }
 	  }
-	  break;
+	  for(size_t jFormat=++iFormat;jFormat <format.size();jFormat++){
+	    if((format[jFormat] == '_') || (jFormat == (format.size()-1))){
+	      //convert value to number
+	      if(jFormat == (format.size()-1)){
+		jFormat++;
+	      }
+	      enumMap[val] = format.substr(iFormat,jFormat-iFormat);
+	      iFormat = jFormat;
+	      break;
+	    }
+	  }
+	}else{
+	  iFormat++;
 	}
       }
+      uint64_t regValue = ComputeValue();
+      if(enumMap.find(regValue) != enumMap.end()){
+	if('t' == format[0]){
+	  //Just format for 't'
+	  snprintf(buffer,bufferSize,"%s",enumMap[regValue].c_str());
+	}else{
+	  //format and number in hex for 'T'
+	  snprintf(buffer,bufferSize,"%s (0x%" PRIX64 ")",enumMap[regValue].c_str(),regValue);
+	}       
+      }else{
+	snprintf(buffer,bufferSize,"0x%" PRIX64 ")",regValue);
+      }
+    }else if((format.size() > 1) && (('m' == format[0]) || ('M' == format[0]))){      
+      //Split the '_' separated values
+      std::vector<uint64_t> mathValues;
+      size_t iFormat = 1;
+      while(mathValues.size() != 6 && iFormat < format.size()){
+	if(format[iFormat] == '_'){
+	  //start parsing
+	  for(size_t jFormat=++iFormat;jFormat <format.size();jFormat++){
+	    if((format[jFormat] == '_') || (jFormat == (format.size()-1))){
+	      //convert value to number
+	      if(jFormat == (format.size()-1)){
+		jFormat++;
+	      }
+	      uint64_t val = strtoull(format.substr(iFormat,jFormat-iFormat).c_str(),NULL,0);
+	      mathValues.push_back(val);
+	      iFormat = jFormat;
+	      break;
+	    }
+	  }
+	}else{
+	  iFormat++;
+	}
+      }
+      //check that there are 6 values
+      if(mathValues.size() != 6){
+	return std::string(buffer);	
+      }
+      //check that no demoniator is 0
+      if((mathValues[2] == 0) || (mathValues[5] == 0)){
+	return std::string(buffer);
+      }
+
+      //computer the value ((m * x) + b)      
+      double transformedValue = ComputeValue();
+      //multiply by absolute value of m
+      transformedValue *= double(mathValues[1]);
+      transformedValue /= double(mathValues[2]); 
+      if(mathValues[0] == 0){
+	//apply sign of m
+	transformedValue *= -1;
+      }
+      
+      double b = double(mathValues[4])/double(mathValues[5]);
+      if(mathValues[3] != 0){
+	transformedValue += b;
+      }else{
+	transformedValue -= b;
+      }
+
+      //print it
+      snprintf(buffer,bufferSize,	       
+	       "%3.2f",transformedValue);
+
     }else{
       if(iequals(format,std::string("x")) && ComputeValue() >= 10){
 	fmtString.assign("0x%");

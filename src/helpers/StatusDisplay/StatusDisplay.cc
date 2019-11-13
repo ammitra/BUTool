@@ -85,15 +85,20 @@ namespace BUTool{
     if (statusMode == HTML) {
       std::string head_color = "lightblue";
       std::string cell_color = "lightgreen";
-      std::string err_color = "#FB412d"; //red                                                                                                                                                              
+      std::string err_color = "#FB412d"; //red
+      std::string warn_color = "#FFFF00"; //yellow                          
+         
       std::string null_color = "lightgrey";
-      stream << "table { float: left; margin: 10px;}\n"; //Allows multiple tables on the same line with spacing                                                                                                                             
-      stream << "th { font-size: smaller; background-color:" << head_color << ";}\n"; // Sets header font size and background color                                                                                                         
-      stream << "th.name {font-size: 20px; }\n";  // Increases the font size of the cell containing the name of the tables                                                                                                                  
-      stream << "td { background-color:" << null_color << "; text-align: right;}\n"; // Sets the background color of null cells to grey                                                                                                     
-      stream << "td.nonerror { background-color:" << cell_color << ";}\n" ; // sets the background color of data cells                                                                                                                      
-      stream << "td.error { background-color:" << err_color << ";}\n"; // sets the background color of error cells                                                                                                                          
+      stream << "table { float: left; margin: 10px;}\n"; //Allows multiple tables on the same line with spacing
+      stream << "th { font-size: smaller; background-color:" << head_color << ";}\n"; // Sets header font size and background color
+      stream << "th.name {font-size: 20px; }\n";  // Increases the font size of the cell containing the name of the tables
+      stream << "td { background-color:" << null_color << "; text-align: right;}\n"; // Sets the background color of null cells to grey
+      stream << "td.nonerror { background-color:" << cell_color << ";}\n" ; // sets the background color of data cells
+ 
+      stream << "td.warning { background-color:" << warn_color << ";}\n"; // sets the background color of error cells
+      stream << "td.error { background-color:" << err_color << ";}\n"; // sets the background color of error cells 
       stream << "td.null { background-color:" << null_color << ";} </style></head><body>\n"; // sets the background color of null cells
+
     }
   }
 

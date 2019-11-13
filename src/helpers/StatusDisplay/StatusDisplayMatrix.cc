@@ -535,14 +535,24 @@ namespace BUTool{
 	if(colWidth[iCol] > 0){
 	  std::map<std::string,StatusDisplayCell*>::const_iterator itMap = colMap.find(colName[iCol]);
 	  if(itMap != colMap.end()){
+
 	    //sets the class for the td element for determining its color
-	    std::string tdClass = (itMap->second->GetDesc().find("error") != std::string::npos ? "error" : "nonerror") ;
+	    std::string tdClass = "";
+	    if((itMap->second->GetDesc().find("error") != std::string::npos)){
+	      tdClass = "error";
+	    }else if((itMap->second->GetDesc().find("warning") != std::string::npos)){
+	      tdClass = "warning" ;
+	    }else{
+	      tdClass = "nonerror";
+	    }
 	    tdClass = (itMap->second->Print(colWidth[iCol],true) == "0") ? "null" : tdClass; 
+
 	    if(itMap->second->Display(status,forceDisplay)){
 	      stream << "<td title=\"" << itMap->second->GetDesc()  << "\" class=\"" << tdClass << "\">" 
 		     << itMap->second->Print(colWidth[iCol],true) << "</td>";
 	    }else{
-	      stream << "<td title=\"" << itMap->second->GetDesc()  << "\" class=\"" << tdClass << "\">" << " " << "</td>";
+	      //	      stream << "<td title=\"" << itMap->second->GetDesc()  << "\" class=\"" << tdClass << "\">" << " " << "</td>";
+	      stream << "<td title=\"" << itMap->second->GetDesc()  << "\">" << " " << "</td>";
 	    }
 	  }else{
 	    stream << "<td>" << " " << "</td>";
