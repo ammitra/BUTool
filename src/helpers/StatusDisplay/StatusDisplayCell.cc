@@ -283,9 +283,9 @@ namespace BUTool{
       //This is the nused to build the floating point value
       union {
 	struct {
-	  uint16_t sign        :  1;
-	  uint16_t exponent    :  5;
 	  uint16_t significand : 10;
+	  uint16_t exponent    :  5;
+	  uint16_t sign        :  1;
 	} fp16;
 	int16_t raw;} val;
       val.raw = ComputeValue();
