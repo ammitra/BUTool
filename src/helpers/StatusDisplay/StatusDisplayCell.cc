@@ -298,7 +298,7 @@ namespace BUTool{
 	    floatingValue *= -1.0;
 	  }
 	}else{
-	  floatingValue = pow(2,-14)*(val.fp16.significand/1023.0);
+	  floatingValue = pow(2,-14)*(val.fp16.significand/1024.0);
 	  if(val.fp16.sign){
 	    floatingValue *= -1.0;
 	  }
@@ -315,7 +315,7 @@ namespace BUTool{
 	}
 	break;
       default:
-	floatingValue = pow(2,val.fp16.exponent-15)*(1.0+(val.fp16.significand/1023.0));
+	floatingValue = pow(2,val.fp16.exponent-15)*(1.0+(val.fp16.significand/1024.0));
 	if(val.fp16.sign){
 	  floatingValue *= -1.0;
 	}
