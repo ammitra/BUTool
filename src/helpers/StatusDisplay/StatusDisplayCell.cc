@@ -274,7 +274,7 @@ namespace BUTool{
 	} linear11;
 	int16_t raw;} val;
       val.raw = ComputeValue();
-      double floatingValue = double(val.linear11.integer) * double(1 << val.linear11.exponent);
+      double floatingValue = double(val.linear11.integer) * pow(2,val.linear11.exponent);
       snprintf(buffer,bufferSize,
 	       "%3.2f",floatingValue);
     }else if(iequals(format,std::string("fp16"))){
