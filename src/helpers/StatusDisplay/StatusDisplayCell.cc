@@ -276,7 +276,7 @@ namespace BUTool{
       val.raw = ComputeValue();
       double floatingValue = double(val.linear11.integer) * pow(2,val.linear11.exponent);
       snprintf(buffer,bufferSize,
-	       "%3.2f",floatingValue);
+	       "%3.3f",floatingValue);
     }else if(iequals(format,std::string("fp16"))){
       //union/struct magic to automatically convert the 1 sign, 10 base  and
       //5 bit mantissa into ints which are assigned via the raw value
@@ -322,7 +322,7 @@ namespace BUTool{
 	break;
       }
       snprintf(buffer,bufferSize,
-	       "%3.2f",floatingValue);
+	       "%3.2e",floatingValue);
     }else{
       if(iequals(format,std::string("x")) && ComputeValue() >= 10){
 	fmtString.assign("0x%");
