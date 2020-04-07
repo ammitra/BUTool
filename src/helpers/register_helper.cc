@@ -6,6 +6,15 @@
 #define __STDC_FORMAT_MACROS
 #include <inttypes.h> //for PRI
 
+std::string BUTool::RegisterHelper::RegReadString(std::string const & /*reg*/){
+  //=============================================================================
+  //placeholder for string read
+  //These should be overloaded if the firmware/software natively supports these features
+  //=============================================================================
+  return std::string();
+}
+
+
 std::vector<uint32_t> BUTool::RegisterHelper::RegReadAddressFIFO(uint32_t addr,size_t count){
   //=============================================================================
   //placeholder for fifo read
@@ -291,7 +300,14 @@ CommandReturn::status BUTool::RegisterHelper::ReadFIFO(std::vector<std::string> 
   return CommandReturn::OK;
 }
 
-
+CommandReturn::status BUTool::RegisterHelper::ReadString(std::vector<std::string> strArg,
+							 std::vector<uint64_t> /*intArg*/){
+  if (strArg.size() ==0){
+    return CommandReturn::BAD_ARGS;
+  }
+  printf("%s: %s\n",strArg[0].c_str(),RegReadString(strArg[0]).c_str());
+  return CommandReturn::OK;
+}
 
 CommandReturn::status BUTool::RegisterHelper::Write(std::vector<std::string> strArg,
 						    std::vector<uint64_t> intArg) {

@@ -25,6 +25,7 @@ namespace BUTool{
     virtual std::vector<uint32_t> RegReadRegisterFIFO(std::string const & reg,size_t count);
     virtual std::vector<uint32_t> RegBlockReadAddress(uint32_t addr,size_t count);
     virtual std::vector<uint32_t> RegBlockReadRegister(std::string const & reg,size_t count);
+    virtual std::string           RegReadString(std::string const & reg);
 
     //writes
     virtual void RegWriteAddress(uint32_t addr,uint32_t data)=0;
@@ -58,6 +59,7 @@ namespace BUTool{
     CommandReturn::status Read(std::vector<std::string> strArg,std::vector<uint64_t> intArg);
     CommandReturn::status ReadFIFO(std::vector<std::string> strArg,std::vector<uint64_t> intArg);
     CommandReturn::status ReadOffset(std::vector<std::string> strArg,std::vector<uint64_t> intArg);
+    CommandReturn::status ReadString(std::vector<std::string> strArg,std::vector<uint64_t> intArg);    
     CommandReturn::status Write(std::vector<std::string> strArg,std::vector<uint64_t> intArg);
     CommandReturn::status WriteFIFO(std::vector<std::string> strArg,std::vector<uint64_t> intArg);
     CommandReturn::status WriteOffset(std::vector<std::string> strArg,std::vector<uint64_t> intArg);
