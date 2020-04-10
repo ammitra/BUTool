@@ -321,9 +321,20 @@ namespace BUTool{
 	}
 	break;
       }
-      snprintf(buffer,bufferSize,
-	       "%3.2e",floatingValue);
+      //only print e notation if very large or very small
+      if((fabs(floatingValue) < 10000) ||
+	 (fabs(floatingValue) > 0.001)
+	 ){
+	snprintf(buffer,bufferSize,
+		 "%3.2f",floatingValue);	
+      }else{
+	snprintf(buffer,bufferSize,
+		 "%3.2e",floatingValue);
+      }
     }else{
+      //Normal numbers
+
+      //hex formatting
       if(iequals(format,std::string("x")) && ComputeValue() >= 10){
 	fmtString.assign("0x%");
 	if(width >= 0){

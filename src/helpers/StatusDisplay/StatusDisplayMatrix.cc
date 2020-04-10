@@ -690,7 +690,7 @@ namespace BUTool{
 	    time_t time_now = time(NULL);
 	    if(itMap->second->Display(status,forceDisplay)){	      
 	      stream << name << "." << itRow->first << "." << colName[iCol] << " "
-		     << itMap->second->Print(colWidth[iCol],true) 
+		     << itMap->second->Print(0,true) 
 		     << " " << time_now << "\n";
 	    }
 	  }
