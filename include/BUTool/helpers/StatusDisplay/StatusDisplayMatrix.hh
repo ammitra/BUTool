@@ -21,7 +21,8 @@ namespace BUTool{
     TEXT,
     HTML,
     BAREHTML,
-    LATEX
+    LATEX,
+    GRAPHITE
   };
 
   
@@ -52,6 +53,9 @@ namespace BUTool{
     void PrintHTML(std::ostream & stream,int status,bool force,int headerColWidth,
 		   std::map<std::string,bool> & rowDisp,std::vector<int> & colWidth) const;
     void PrintLaTeX(std::ostream & stream) const;
+    void PrintGraphite(std::ostream & stream,int status,bool force,int headerColWidth,
+		       std::map<std::string,bool> & rowDisp,std::vector<int> & colWidth) const;
+
 
     std::string name;
     std::map<std::string,StatusDisplayCell*> cell;

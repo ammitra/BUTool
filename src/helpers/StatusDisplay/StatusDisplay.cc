@@ -222,6 +222,10 @@ namespace BUTool{
   void StatusDisplay::SetLaTeX() {statusMode = LATEX;}
   /*! Unselect LaTeX source output mode */
   void StatusDisplay::UnsetLaTeX() {statusMode = TEXT;}
+  /*! Unselect GRAPHITE output mode */
+  void StatusDisplay::SetGraphite(){statusMode = GRAPHITE;}
+  /*! Unselect GRAPHITE output mode */
+  void StatusDisplay::UnsetGraphite(){statusMode = TEXT;}
   
 
   

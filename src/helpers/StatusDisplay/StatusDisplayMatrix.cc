@@ -433,6 +433,8 @@ namespace BUTool{
       PrintLaTeX(stream);
     }else if(statusMode == HTML || statusMode == BAREHTML){
       PrintHTML(stream,status,forceDisplay,headerColWidth,rowDisp,colWidth);
+    }else if (statusMode == GRAPHITE){
+      PrintGraphite(stream,status,forceDisplay,headerColWidth,rowDisp,colWidth);
     }else{
       Print(stream,status,forceDisplay,headerColWidth,rowDisp,colWidth);
     }
@@ -504,13 +506,12 @@ namespace BUTool{
     stream << std::endl;
   }
   void StatusDisplayMatrix::PrintHTML(std::ostream & stream,
-				   int status,
-				   bool forceDisplay,
-				   int headerColWidth,
-				   std::map<std::string,bool> & rowDisp,
-				   std::vector<int> & colWidth) const
+				      int status,
+				      bool forceDisplay,
+				      int /*headerColWidth*/,
+				      std::map<std::string,bool> & rowDisp,
+				      std::vector<int> & colWidth) const
   {
-    (void) headerColWidth; // casting to void to keep comiler from complaining about unused var
     //=====================
     //Print the header
     //=====================
@@ -670,5 +671,32 @@ namespace BUTool{
 
 
   
-  
+  void StatusDisplayMatrix::PrintGraphite(std::ostream & stream,
+					  int status,
+					  bool forceDisplay,
+					  int /*headerColWidth*/,
+					  std::map<std::string,bool> & rowDisp,
+					  std::vector<int> & colWidth) const
+  {
+    for(std::map<std::string,bool>::iterator itRow = rowDisp.begin();
+	itRow != rowDisp.end();
+	itRow++){
+      //Print the data
+      const std::map<std::string,StatusDisplayCell*> & colMap = rowColMap.at(itRow->first);
+      for(size_t iCol = 0; iCol < colName.size();iCol++){	  
+	if(colWidth[iCol] > 0){
+	  std::map<std::string,StatusDisplayCell*>::const_iterator itMap = colMap.find(colName[iCol]);
+	  if(itMap != colMap.end()){
+	    time_t time_now = time(NULL);
+	    if(itMap->second->Display(status,forceDisplay)){	      
+	      stream << name << "." << itRow->first << "." << colName[iCol] << " "
+		     << itMap->second->Print(colWidth[iCol],true) 
+		     << " " << time_now << "\n";
+	    }
+	  }
+	}
+      }
+    }
+  }
+ 
 }

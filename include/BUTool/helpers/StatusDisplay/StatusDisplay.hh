@@ -73,6 +73,10 @@ namespace BUTool{
     void SetLaTeX();
     /*! Unselect LaTeX source output mode */
     void UnsetLaTeX();
+    /*! Select Graphite source output mode */
+    void SetGraphite();
+    /*! Unselect Graphite source output mode */
+    void UnsetGraphite();
     /*! Get a const pointer to a StatusDisplayMatrix item */
     const StatusDisplayMatrix* GetTable(const std::string& table) const;
     /*! Get a list of tables */
