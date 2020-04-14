@@ -117,6 +117,8 @@ namespace BUTool{
 	itTable++){
       itTable->second.Render(stream,level,statusMode);
     }
+    //Clean up tables for next time
+    tables.clear();
   }
 
   void StatusDisplay::ReportTrailer(std::ostream & stream) const
