@@ -20,8 +20,9 @@ namespace BUTool{
   class StatusDisplay{
   public:
     StatusDisplay();
-    virtual ~StatusDisplay(){};
+    virtual ~StatusDisplay(){Clear();};
 
+    void Clear(){tables.clear();};
     void ReportHeader(std::ostream & stream) const;
     std::string ReportHeader() const;
     void ReportStyle(std::ostream & stream) const;

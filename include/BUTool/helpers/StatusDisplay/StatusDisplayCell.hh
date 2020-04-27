@@ -22,6 +22,7 @@ namespace BUTool{
   public:
     ///! Constructor
     StatusDisplayCell(){Clear();};
+    ~StatusDisplayCell(){Clear();};
     ///! Fill in values for a cell
     void Setup(std::string const & _address,  /// address table name stripped of Hi/Lo
 	       std::string const & _description, /// long description

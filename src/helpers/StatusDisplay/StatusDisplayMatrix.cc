@@ -42,6 +42,10 @@ namespace BUTool{
     }
     //clear the vector
     cell.clear();
+    rowColMap.clear();
+    colRowMap.clear();
+    rowName.clear();
+    colName.clear();
   }
 
   std::vector<std::string> StatusDisplayMatrix::GetTableRows() const {
