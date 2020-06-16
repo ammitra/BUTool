@@ -17,8 +17,10 @@
 #include <signal.h> //signals
 
 #include <BUTool/helpers/parseHelpers.hh>
+#include <boost/program_options.hpp> //for configfile parsing
 
 #define BUTOOL_AUTOLOAD_LIBRARY_LIST "BUTOOL_AUTOLOAD_LIBRARY_LIST"
+#define DEFAULT_CONFIG_FILE          "/etc/BUTool.cfg" //path to default config file
 
 using namespace BUTool;                                                 
 
@@ -323,3 +325,46 @@ int main(int argc, char* argv[])
     }
   return 0;
 }
+
+boost::program_options::variables_map loadConfig(std::string const & configFileName,
+						 boost::program_options::options_description const & fileOptions) {
+  // This is a container for the information that fileOptions will get from the config file
+  boost::program_options::variables_map vm;  
+  // Check if config file exists
+  std::ifstream ifs{configFileName};
+  printf("Config file \"%s\" %s\n",configFileName.c_str(), (!ifs.fail()) ? "exists" : "does not exist");
+  if(ifs) {
+    // If config file exists, parse ifs into fileOptions and store information from fileOptions into vm
+    boost::program_options::store(parse_config_file(ifs, fileOptions), vm);
+    printf("checkpoint1\n");
+  }
+  return vm;
+}
+
+
+std::string getFromConfig(std::string configFile) {
+  printf("using .xml connection file defined in %s\n", configFile.c_str());
+  //Getting connection file from config file
+  std::string connectionFile=DEFAULT_CONNECTION_FILE;
+  // fileOptions is for parsing config files
+  boost::program_options::options_description fileOptions{"File"};
+  //something to do with C++ magic
+  fileOptions.add_options()
+    ("connectionFile",
+     boost::program_options::value<std::string>()->default_value(DEFAULT_CONNECTION_FILE),
+     "connection file");
+  boost::program_options::variables_map configOptions;
+  try{
+    configOptions = loadConfig(configFile,fileOptions);
+    printf("checkpoint2\n");
+    // Check for information in configOptions
+    if(configOptions.count("connectionFile")) {
+      connectionFile = configOptions["connectionFile"].as<std::string>();
+    }
+  } catch(const boost::program_options::error &ex){
+    printf("Caught exception in function loadConfig(): %s \n", ex.what());
+  }
+  return connectionFile;
+}
+
+arg[0] = getFromConfig(DEFAULT_CONFIG_FILE);
