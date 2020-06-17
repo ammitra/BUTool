@@ -22,7 +22,8 @@
 #define BUTOOL_AUTOLOAD_LIBRARY_LIST "BUTOOL_AUTOLOAD_LIBRARY_LIST"
 #define DEFAULT_CONFIG_FILE          "/etc/BUTool.cfg" //path to default config file
 
-using namespace BUTool;                                                 
+using namespace BUTool;
+namespace po = boost::program_options; //makeing life easier for boost                                 
 
 #define DevFac BUTool::DeviceFactory::Instance()
 
@@ -180,6 +181,7 @@ int main(int argc, char* argv[])
 
     //connections
     std::map<std::string,TCLAP::MultiArg<std::string>* >connections;
+    //std::map<std::string,boost::program_options::
     std::vector<std::string> Devices = DevFac->GetDeviceNames();
     for(size_t iDevice = 0;
 	iDevice < Devices.size();
@@ -188,13 +190,15 @@ int main(int argc, char* argv[])
       std::string  CLI_full_flag;
       std::string  CLI_description;
 
+
+
       if(DevFac->CLIArgs(Devices[iDevice],CLI_flag,CLI_full_flag,CLI_description)){
-	  connections[Devices[iDevice]] = new TCLAP::MultiArg<std::string>(CLI_flag,       //one char flag
-									   CLI_full_flag,  // full flag name
-									   CLI_description,//description
-									   false,          //required
-									   "string",       // type
-									   cmd);
+	/*adding args?*/	  connections[Devices[iDevice]] = new TCLAP::MultiArg<std::string>(CLI_flag,       //one char flag
+												   CLI_full_flag,  // full flag name
+												   CLI_description,//description
+												   false,          //required
+												   "string",       // type
+												   cmd);
       }
     }
     
@@ -206,6 +210,10 @@ int main(int argc, char* argv[])
 					   "string",               // type
 					   cmd);
 
+    
+    po::variables_map vm;
+    po::store(parse_command_line(argc, argv, options), vm); //get options from command line, takes priority
+    po::store(parse_config_file(DEFAULT_CONFIG_FILE,options), vm); //gegt options from configfile, fills gaps from above?
 
 
     //Parse the command line arguments
@@ -217,7 +225,7 @@ int main(int argc, char* argv[])
 	it++)
       {
 	cli.ProcessString("add_lib " + *it);
-      }
+      } /*this is what prepocesses the library adding*/
 
 
     //setup connections
@@ -232,7 +240,7 @@ int main(int argc, char* argv[])
 	{
 	  cli.ProcessString("add_device " + itDeviceType->first + " " +  *itDev);
 	}
-    }
+    } /*this is what preprocesses the device adding*/
 
 
     //Load scripts
@@ -366,5 +374,18 @@ std::string getFromConfig(std::string configFile) {
   }
   return connectionFile;
 }
+ 
+//This should exist as the template for adding options to the config file?
+po::options_description makeOptions(){
+  po::options_description options("BUTool Options");
+  options.add_options()
+    ("test,t",po::value<std::vector<std::string>>,"a vector of strings for testing")
+    ("script,X",po::value<std::string>,"script filename")//figure out po::value<std::string>->default_value("")
+    ("connections",po::value<std::vector<std::string>>,"need to fill")
+    ("libraries",po::value<std::vector<std::string>>,"Device library to add");
+  
+  return options;
+}
 
-arg[0] = getFromConfig(DEFAULT_CONFIG_FILE);
+
+
