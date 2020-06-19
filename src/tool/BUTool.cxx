@@ -18,6 +18,7 @@
 
 #include <BUTool/helpers/parseHelpers.hh>
 #include <boost/program_options.hpp> //for configfile parsing
+//#include <boost/program_options/variables_map.hpp> //for variables map
 
 #define BUTOOL_AUTOLOAD_LIBRARY_LIST "BUTOOL_AUTOLOAD_LIBRARY_LIST"
 #define DEFAULT_CONFIG_FILE          "/etc/BUTool.cfg" //path to default config file
@@ -211,9 +212,18 @@ int main(int argc, char* argv[])
 					   cmd);
 
     
+    //Setup program options
+    //po::options_description options("BUTool Options");
+    //options.add_options()
+      //("test,t",po::value<std::vector<std::string>>,"a vector of strings for testing")
+      //("script,X",po::value<std::string>,"script filename")//figure out po::value<std::string>->default_value("")
+      //("connections",po::value<std::vector<std::string>>,"need to fill")
+      //("libraries",po::value<std::vector<std::string>>,"Device library to add");
+
+    //read options into variable map from commandline then config file
     po::variables_map vm;
-    po::store(parse_command_line(argc, argv, options), vm); //get options from command line, takes priority
-    po::store(parse_config_file(DEFAULT_CONFIG_FILE,options), vm); //gegt options from configfile, fills gaps from above?
+    //po::store(parse_command_line(argc, argv, options), vm); //get options from command line, takes priority
+    //po::store(parse_config_file(DEFAULT_CONFIG_FILE,options), vm); //gegt options from configfile, fills gaps from above?
 
 
     //Parse the command line arguments
@@ -334,58 +344,44 @@ int main(int argc, char* argv[])
   return 0;
 }
 
-boost::program_options::variables_map loadConfig(std::string const & configFileName,
-						 boost::program_options::options_description const & fileOptions) {
-  // This is a container for the information that fileOptions will get from the config file
-  boost::program_options::variables_map vm;  
-  // Check if config file exists
-  std::ifstream ifs{configFileName};
-  printf("Config file \"%s\" %s\n",configFileName.c_str(), (!ifs.fail()) ? "exists" : "does not exist");
-  if(ifs) {
-    // If config file exists, parse ifs into fileOptions and store information from fileOptions into vm
-    boost::program_options::store(parse_config_file(ifs, fileOptions), vm);
-    printf("checkpoint1\n");
-  }
-  return vm;
-}
+// boost::program_options::variables_map loadConfig(std::string const & configFileName,
+// 						 boost::program_options::options_description const & fileOptions) {
+//   // This is a container for the information that fileOptions will get from the config file
+//   boost::program_options::variables_map vm;  
+//   // Check if config file exists
+//   std::ifstream ifs{configFileName};
+//   printf("Config file \"%s\" %s\n",configFileName.c_str(), (!ifs.fail()) ? "exists" : "does not exist");
+//   if(ifs) {
+//     // If config file exists, parse ifs into fileOptions and store information from fileOptions into vm
+//     boost::program_options::store(parse_config_file(ifs, fileOptions), vm);
+//     printf("checkpoint1\n");
+//   }
+//   return vm;
+// }
 
 
-std::string getFromConfig(std::string configFile) {
-  printf("using .xml connection file defined in %s\n", configFile.c_str());
-  //Getting connection file from config file
-  std::string connectionFile=DEFAULT_CONNECTION_FILE;
-  // fileOptions is for parsing config files
-  boost::program_options::options_description fileOptions{"File"};
-  //something to do with C++ magic
-  fileOptions.add_options()
-    ("connectionFile",
-     boost::program_options::value<std::string>()->default_value(DEFAULT_CONNECTION_FILE),
-     "connection file");
-  boost::program_options::variables_map configOptions;
-  try{
-    configOptions = loadConfig(configFile,fileOptions);
-    printf("checkpoint2\n");
-    // Check for information in configOptions
-    if(configOptions.count("connectionFile")) {
-      connectionFile = configOptions["connectionFile"].as<std::string>();
-    }
-  } catch(const boost::program_options::error &ex){
-    printf("Caught exception in function loadConfig(): %s \n", ex.what());
-  }
-  return connectionFile;
-}
+// std::string getFromConfig(std::string configFile) {
+//   printf("using .xml connection file defined in %s\n", configFile.c_str());
+//   //Getting connection file from config file
+//   std::string connectionFile=DEFAULT_CONNECTION_FILE;
+//   // fileOptions is for parsing config files
+//   boost::program_options::options_description fileOptions{"File"};
+//   //something to do with C++ magic
+//   fileOptions.add_options()
+//     ("connectionFile",
+//      boost::program_options::value<std::string>()->default_value(DEFAULT_CONNECTION_FILE),
+//      "connection file");
+//   boost::program_options::variables_map configOptions;
+//   try{
+//     configOptions = loadConfig(configFile,fileOptions);
+//     printf("checkpoint2\n");
+//     // Check for information in configOptions
+//     if(configOptions.count("connectionFile")) {
+//       connectionFile = configOptions["connectionFile"].as<std::string>();
+//     }
+//   } catch(const boost::program_options::error &ex){
+//     printf("Caught exception in function loadConfig(): %s \n", ex.what());
+//   }
+//   return connectionFile;
+// }
  
-//This should exist as the template for adding options to the config file?
-po::options_description makeOptions(){
-  po::options_description options("BUTool Options");
-  options.add_options()
-    ("test,t",po::value<std::vector<std::string>>,"a vector of strings for testing")
-    ("script,X",po::value<std::string>,"script filename")//figure out po::value<std::string>->default_value("")
-    ("connections",po::value<std::vector<std::string>>,"need to fill")
-    ("libraries",po::value<std::vector<std::string>>,"Device library to add");
-  
-  return options;
-}
-
-
-
