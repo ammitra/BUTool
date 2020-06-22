@@ -18,7 +18,6 @@
 
 #include <BUTool/helpers/parseHelpers.hh>
 #include <boost/program_options.hpp> //for configfile parsing
-//#include <boost/program_options/variables_map.hpp> //for variables map
 
 #define BUTOOL_AUTOLOAD_LIBRARY_LIST "BUTOOL_AUTOLOAD_LIBRARY_LIST"
 #define DEFAULT_CONFIG_FILE          "/etc/BUTool.cfg" //path to default config file
@@ -53,13 +52,24 @@ void signal_handler(int sig){
     rl_forced_update_display();
     
   }else if (sig == SIGALRM){    
-    //re-enable SIGINT capture
+
+    //re-enable SIGINT capture                                                                                                                                                                                    
     struct sigaction sa;
     sa.sa_handler = signal_handler;
     sigemptyset(&sa.sa_mask);
-    sigaction(SIGINT, &sa, NULL);    
+    sigaction(SIGINT, &sa, NULL);
   }
 }
+
+
+
+// std::string LimitStringLines(s    //re-enable SIGINT capture
+// 			     struct sigaction sa;
+// 			     sa.sa_handler = signal_handler;
+// 			     sigemptyset(&sa.sa_mask);
+// 			     sigaction(SIGINT, &sa, NULL);    
+// 			     }
+//   }
 
 
 
@@ -171,6 +181,12 @@ int main(int argc, char* argv[])
 		       ' ',
 		       "BUTool v1.0");
     
+    //set up options for BUTool
+    po::options_description options("BUTool Options");
+    options.add_options()
+      ("script,X",po::value<std::string>(),"script filename");//figure out po::value<std::string>->default_value("")
+    
+    
     //Script files
     TCLAP::ValueArg<std::string> scriptFile("X",              //one char flag
 					    "script",         // full flag name
@@ -182,6 +198,7 @@ int main(int argc, char* argv[])
 
     //connections
     std::map<std::string,TCLAP::MultiArg<std::string>* >connections;
+    //std::
     //std::map<std::string,boost::program_options::
     std::vector<std::string> Devices = DevFac->GetDeviceNames();
     for(size_t iDevice = 0;
@@ -213,16 +230,14 @@ int main(int argc, char* argv[])
 
     
     //Setup program options
-    //po::options_description options("BUTool Options");
-    //options.add_options()
-      //("test,t",po::value<std::vector<std::string>>,"a vector of strings for testing")
-      //("script,X",po::value<std::string>,"script filename")//figure out po::value<std::string>->default_value("")
-      //("connections",po::value<std::vector<std::string>>,"need to fill")
-      //("libraries",po::value<std::vector<std::string>>,"Device library to add");
+    
+    options.add_options()
+      ("connections",po::value<std::vector<std::string>>(),"need to fill")
+      ("libraries,1",po::value<std::vector<std::string>>(),"Device library to add");
 
     //read options into variable map from commandline then config file
     po::variables_map vm;
-    //po::store(parse_command_line(argc, argv, options), vm); //get options from command line, takes priority
+    po::store(parse_command_line(argc, argv, options), vm); //get options from command line, takes priority
     //po::store(parse_config_file(DEFAULT_CONFIG_FILE,options), vm); //gegt options from configfile, fills gaps from above?
 
 
@@ -235,8 +250,18 @@ int main(int argc, char* argv[])
 	it++)
       {
 	cli.ProcessString("add_lib " + *it);
-      } /*this is what prepocesses the library adding*/
+	std::string tmpPrint = "add_lib " + *it;
+	printf("from TCLAP: %s\n", tmpPrint.c_str());
+      }
+    
 
+    //Using Boost to add libraries
+    if(vm.count("libraries")){
+      std::vector<std::string> libraries_t = vm["libraries"].as<std::vector<std::string>>();
+      for(uint i=0; i < libraries_t.size(); i++){
+	printf("from BOOST: add_lib %s\n", libraries_t[i].c_str()); 
+      }
+    }
 
     //setup connections
     //Loop over all device types
@@ -249,9 +274,17 @@ int main(int argc, char* argv[])
 	  itDev++)
 	{
 	  cli.ProcessString("add_device " + itDeviceType->first + " " +  *itDev);
+	  std::string tmpPrint = "add_device " + itDeviceType->first + " " + *itDev;
+	  printf("from TCLAAP: %s\n", tmpPrint.c_str());
 	}
     } /*this is what preprocesses the device adding*/
 
+    //Using Boost to add connections
+    if(vm.count("connections")){
+      std::vector<std::string> connections_t = vm["connections"].as<std::vector<std::string>>();
+      // for(uint i-0; i < connections_t.size(); i++){
+      // 	printf("from BOOST: add_device %s %s"
+    }
 
     //Load scripts
     if(scriptFile.getValue().size()){
