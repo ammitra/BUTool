@@ -20,7 +20,8 @@
 #include <boost/program_options.hpp> //for configfile parsing
 
 #define BUTOOL_AUTOLOAD_LIBRARY_LIST "BUTOOL_AUTOLOAD_LIBRARY_LIST"
-#define DEFAULT_CONFIG_FILE          "/etc/BUTool.cfg" //path to default config file
+//#define DEFAULT_CONFIG_FILE          "/etc/BUTool.cfg" //path to default config file
+#define DEFAULT_CONFIG_FILE "/home/mikekremer/work/misc/BUTool.cfg"
 
 using namespace BUTool;
 namespace po = boost::program_options; //makeing life easier for boost                                 
@@ -156,7 +157,13 @@ int main(int argc, char* argv[])
   //Create Command launcher (early, so we can set things)
   Launcher launcher;
 
-
+  //Setup Boost programoptions
+  po::options_description options("BUTool Options");
+  options.add_options()
+    ("test,t",     "for testing")
+    ("script,X",  po::value<std::string>(), "Script filename")
+    ("library,l", po::value<std::vector<std::string>>(), "Device library to add");
+    
   //Load libraries from env variable
   if (NULL != getenv(BUTOOL_AUTOLOAD_LIBRARY_LIST)){
     std::vector<std::string> libFiles = splitString(getenv(BUTOOL_AUTOLOAD_LIBRARY_LIST),":");
@@ -174,18 +181,13 @@ int main(int argc, char* argv[])
     }
   }
 
+  
 
   
   try {
     TCLAP::CmdLine cmd("Tool for talking to HW modules.",
 		       ' ',
-		       "BUTool v1.0");
-    
-    //set up options for BUTool
-    po::options_description options("BUTool Options");
-    options.add_options()
-      ("script,X",po::value<std::string>(),"script filename");//figure out po::value<std::string>->default_value("")
-    
+		       "BUTool v1.0");    
     
     //Script files
     TCLAP::ValueArg<std::string> scriptFile("X",              //one char flag
@@ -197,54 +199,75 @@ int main(int argc, char* argv[])
 					    cmd);
 
     //connections
-    std::map<std::string,TCLAP::MultiArg<std::string>* >connections;
-    //std::
-    //std::map<std::string,boost::program_options::
+    std::map<std::string,TCLAP::MultiArg<std::string>* >connections2;
+    std::vector<std::string> connections;
+    int connections_count = 0;
+
     std::vector<std::string> Devices = DevFac->GetDeviceNames();
-    for(size_t iDevice = 0;
-	iDevice < Devices.size();
-	iDevice++){
+    for(size_t iDevice = 0; iDevice < Devices.size(); iDevice++){
       std::string  CLI_flag;      
       std::string  CLI_full_flag;
       std::string  CLI_description;
-
-
-
+      
       if(DevFac->CLIArgs(Devices[iDevice],CLI_flag,CLI_full_flag,CLI_description)){
-	/*adding args?*/	  connections[Devices[iDevice]] = new TCLAP::MultiArg<std::string>(CLI_flag,       //one char flag
-												   CLI_full_flag,  // full flag name
-												   CLI_description,//description
-												   false,          //required
-												   "string",       // type
-												   cmd);
+	std::string tmpFlag = CLI_full_flag;
+	std::string tmpName = CLI_full_flag + "," + CLI_flag;
+	std::string tmpDesc = CLI_description;
+	char *cFlag = new char[tmpFlag.size() + 1];
+	char *cName = new char[tmpName.size() + 1];
+	char *cDesc = new char[tmpDesc.size() + 1];
+	strcpy(cFlag, tmpFlag.c_str());
+	strcpy(cName, tmpName.c_str());
+	strcpy(cDesc, tmpDesc.c_str());
+	options.add_options()
+	  (cName, po::value<std::string>(), cDesc);
+	delete[] cName;
+	delete[] cDesc;
+	connections[connections_count] = *cFlag;
+	connections_count++;
+	connections2[Devices[iDevice]] = new TCLAP::MultiArg<std::string>(CLI_flag,       //one char flag
+									 CLI_full_flag,  // full flag name
+									 CLI_description,//description
+									 false,          //required
+									 "string",       // type
+									 cmd);
       }
     }
     
     //Device libraries
     TCLAP::MultiArg<std::string> libraries("l",                    //one char flag
-					   "add_library",          // full flag name
-					   "Device library to add",//description
-					   false,                  //required
-					   "string",               // type
-					   cmd);
-
+    					   "add_library",          // full flag name
+    					   "Device library to add",//description
+    					   false,                  //required
+    					   "string",               // type
+    					   cmd);
     
-    //Setup program options
+    //normal use case
+    std::ifstream configFile(DEFAULT_CONFIG_FILE);
+    po::variables_map commandMap;
+    po::variables_map configMap;      
+    po::store(parse_command_line(argc, argv, options), commandMap);    //get options from command line, takes priority
+    po::store(parse_config_file(configFile,options,true), commandMap); //get options from configfile, fills gaps from above
     
-    options.add_options()
-      ("connections",po::value<std::vector<std::string>>(),"need to fill")
-      ("libraries,1",po::value<std::vector<std::string>>(),"Device library to add");
-
-    //read options into variable map from commandline then config file
-    po::variables_map vm;
-    po::store(parse_command_line(argc, argv, options), vm); //get options from command line, takes priority
-    //po::store(parse_config_file(DEFAULT_CONFIG_FILE,options), vm); //gegt options from configfile, fills gaps from above?
-
+    if(commandMap.count("test")){
+      printf("commandMap.count(test) is true\n");
+      std::string tmpPrint = commandMap["test"].as<std::string>();
+      printf("from BOOST: test is %s\n", tmpPrint.c_str());
+    }
 
     //Parse the command line arguments
     cmd.parse(argc,argv);
 
     //Load requested device libraries
+    if(commandMap.count("libraries")) {
+      std::vector<std::string> libraries = commandMap["libraries"].as<std::vector<std::string>>();
+      for(uint i = 0; i < libraries.size(); i++) {
+	cli.ProcessString("add_lib " + libraries[i]);
+    	std::string tmpPrint = "from BOOST: add_lib " + libraries[i];
+    	printf("%s\n", tmpPrint.c_str());     
+      }
+    }
+
     for(std::vector<std::string>::const_iterator it = libraries.getValue().begin(); 
 	it != libraries.getValue().end();
 	it++)
@@ -254,44 +277,27 @@ int main(int argc, char* argv[])
 	printf("from TCLAP: %s\n", tmpPrint.c_str());
       }
     
-
-    //Using Boost to add libraries
-    if(vm.count("libraries")){
-      std::vector<std::string> libraries_t = vm["libraries"].as<std::vector<std::string>>();
-      for(uint i=0; i < libraries_t.size(); i++){
-	printf("from BOOST: add_lib %s\n", libraries_t[i].c_str()); 
-      }
-    }
-
     //setup connections
-    //Loop over all device types
-    for(std::map<std::string,TCLAP::MultiArg<std::string>* >::iterator itDeviceType = connections.begin();
-	itDeviceType != connections.end();
-	itDeviceType++){
-      //Loop over connections requests for each device
-      for(std::vector<std::string>::const_iterator itDev = itDeviceType->second->getValue().begin(); 
-	  itDev != itDeviceType->second->getValue().end();
-	  itDev++)
-	{
-	  cli.ProcessString("add_device " + itDeviceType->first + " " +  *itDev);
-	  std::string tmpPrint = "add_device " + itDeviceType->first + " " + *itDev;
-	  printf("from TCLAAP: %s\n", tmpPrint.c_str());
-	}
-    } /*this is what preprocesses the device adding*/
-
-    //Using Boost to add connections
-    if(vm.count("connections")){
-      std::vector<std::string> connections_t = vm["connections"].as<std::vector<std::string>>();
-      // for(uint i-0; i < connections_t.size(); i++){
-      // 	printf("from BOOST: add_device %s %s"
+    for(int i = 0; i < connections_count; i++){
+      if(commandMap.count(connections[i])){
+	std::string tmpPrint = commandMap[connections[i]].as<std::string>();
+	printf("From BOOST: %s\n", tmpPrint.c_str());
+      } 
     }
+    //Loop over all device types
+    for(std::map<std::string,TCLAP::MultiArg<std::string>* >::iterator itDeviceType = connections2.begin(); itDeviceType != connections2.end(); itDeviceType++){
+      //Loop over connections requests for each device
+      for(std::vector<std::string>::const_iterator itDev = itDeviceType->second->getValue().begin(); itDev != itDeviceType->second->getValue().end(); itDev++){
+	cli.ProcessString("add_device " + itDeviceType->first + " " +  *itDev);
+	std::string tmpPrint = "add_device " + itDeviceType->first + " " + *itDev;
+	printf("from TCLAAP: %s\n", tmpPrint.c_str());
+      }
+    } /*this is what preprocesses the device adding*/
 
     //Load scripts
     if(scriptFile.getValue().size()){
       cli.ProcessFile(scriptFile.getValue());
     }
-
-
 
   } catch (TCLAP::ArgException &e) {
     fprintf(stderr, "Error %s for arg %s\n",
@@ -301,7 +307,7 @@ int main(int argc, char* argv[])
 
 
 
-
+  //Do not need connections after this!
 
   //============================================================================
   //Main loop
@@ -376,45 +382,3 @@ int main(int argc, char* argv[])
     }
   return 0;
 }
-
-// boost::program_options::variables_map loadConfig(std::string const & configFileName,
-// 						 boost::program_options::options_description const & fileOptions) {
-//   // This is a container for the information that fileOptions will get from the config file
-//   boost::program_options::variables_map vm;  
-//   // Check if config file exists
-//   std::ifstream ifs{configFileName};
-//   printf("Config file \"%s\" %s\n",configFileName.c_str(), (!ifs.fail()) ? "exists" : "does not exist");
-//   if(ifs) {
-//     // If config file exists, parse ifs into fileOptions and store information from fileOptions into vm
-//     boost::program_options::store(parse_config_file(ifs, fileOptions), vm);
-//     printf("checkpoint1\n");
-//   }
-//   return vm;
-// }
-
-
-// std::string getFromConfig(std::string configFile) {
-//   printf("using .xml connection file defined in %s\n", configFile.c_str());
-//   //Getting connection file from config file
-//   std::string connectionFile=DEFAULT_CONNECTION_FILE;
-//   // fileOptions is for parsing config files
-//   boost::program_options::options_description fileOptions{"File"};
-//   //something to do with C++ magic
-//   fileOptions.add_options()
-//     ("connectionFile",
-//      boost::program_options::value<std::string>()->default_value(DEFAULT_CONNECTION_FILE),
-//      "connection file");
-//   boost::program_options::variables_map configOptions;
-//   try{
-//     configOptions = loadConfig(configFile,fileOptions);
-//     printf("checkpoint2\n");
-//     // Check for information in configOptions
-//     if(configOptions.count("connectionFile")) {
-//       connectionFile = configOptions["connectionFile"].as<std::string>();
-//     }
-//   } catch(const boost::program_options::error &ex){
-//     printf("Caught exception in function loadConfig(): %s \n", ex.what());
-//   }
-//   return connectionFile;
-// }
- 
