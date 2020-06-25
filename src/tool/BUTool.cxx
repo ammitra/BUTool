@@ -20,8 +20,8 @@
 #include <boost/program_options.hpp> //for configfile parsing
 
 #define BUTOOL_AUTOLOAD_LIBRARY_LIST "BUTOOL_AUTOLOAD_LIBRARY_LIST"
-#define DEFAULT_CONFIG_FILE          "/etc/BUTool.cfg" //path to default config file
-//#define DEFAULT_CONFIG_FILE "/home/mikekremer/work/misc/BUTool.cfg"
+//#define DEFAULT_CONFIG_FILE          "/etc/BUTool.cfg" //path to default config file
+#define DEFAULT_CONFIG_FILE "/home/mikekremer/work/misc/BUTool.cfg"
 
 using namespace BUTool;
 namespace po = boost::program_options; //makeing life easier for boost                                 
@@ -210,9 +210,9 @@ int main(int argc, char* argv[])
       std::string  CLI_description;
       
       if(DevFac->CLIArgs(Devices[iDevice],CLI_flag,CLI_full_flag,CLI_description)){
-	// std::string tmpFlag = CLI_full_flag;
-	// std::string tmpName = CLI_full_flag + "," + CLI_flag;
-	// std::string tmpDesc = CLI_description;
+	std::string tmpFlag = CLI_full_flag;
+	std::string tmpName = CLI_full_flag + "," + CLI_flag;
+	std::string tmpDesc = CLI_description;
 	// char *cFlag = new char[tmpFlag.size() + 1];
 	// char *cName = new char[tmpName.size() + 1];
 	// char *cDesc = new char[tmpDesc.size() + 1];
@@ -245,10 +245,18 @@ int main(int argc, char* argv[])
     //normal use case
     std::ifstream configFile(DEFAULT_CONFIG_FILE);
     po::variables_map commandMap;
-    po::variables_map configMap;      
+    po::variables_map configMap;
+    try {
     po::store(parse_command_line(argc, argv, options), commandMap);    //get options from command line, takes priority
+    } catch (std::exception &e) {
+      fprintf(stderr, "Error in BOOST parse_command_line: %s\n", e.what());
+    }
+    try {
     po::store(parse_config_file(configFile,options,true), commandMap); //get options from configfile, fills gaps from above
-    
+    } catch (std::exception &e) {
+      fprintf(stderr, "Error in BOOST parse_config_file: %s\n", e.what());
+    }
+
     if(commandMap.count("test")){
       printf("commandMap.count(test) is true\n");
       std::string tmpPrint = commandMap["test"].as<std::string>();
