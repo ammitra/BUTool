@@ -20,8 +20,8 @@
 #include <boost/program_options.hpp> //for configfile parsing
 
 #define BUTOOL_AUTOLOAD_LIBRARY_LIST "BUTOOL_AUTOLOAD_LIBRARY_LIST"
-//#define DEFAULT_CONFIG_FILE          "/etc/BUTool.cfg" //path to default config file
-#define DEFAULT_CONFIG_FILE "/home/mikekremer/work/misc/BUTool.cfg"
+#define DEFAULT_CONFIG_FILE          "/etc/BUTool.cfg" //path to default config file
+//#define DEFAULT_CONFIG_FILE "/home/mikekremer/work/misc/BUTool.cfg"
 
 using namespace BUTool;
 namespace po = boost::program_options; //makeing life easier for boost                                 
@@ -216,16 +216,16 @@ int main(int argc, char* argv[])
 	char *cFlag = new char[tmpFlag.size() + 1];
 	char *cName = new char[tmpName.size() + 1];
 	char *cDesc = new char[tmpDesc.size() + 1];
-	// strcpy(cFlag, tmpFlag.c_str());
-	// strcpy(cName, tmpName.c_str());
-	// strcpy(cDesc, tmpDesc.c_str());
-	// options.add_options()
-	//   (cName, po::value<std::string>(), cDesc);
+	strcpy(cFlag, tmpFlag.c_str());
+	strcpy(cName, tmpName.c_str());
+	strcpy(cDesc, tmpDesc.c_str());
+	options.add_options()
+	  (cName, po::value<std::string>(), cDesc);
 	delete[] cFlag;
 	delete[] cName;
 	delete[] cDesc;
-	// connections[connections_count] = *cFlag;
-	// connections_count++;
+	//connections[connections_count] = *cFlag;
+	connections_count++;
 	connections2[Devices[iDevice]] = new TCLAP::MultiArg<std::string>(CLI_flag,       //one char flag
 									 CLI_full_flag,  // full flag name
 									 CLI_description,//description
@@ -271,9 +271,9 @@ int main(int argc, char* argv[])
     if(commandMap.count("libraries")) {
       std::vector<std::string> libraries = commandMap["libraries"].as<std::vector<std::string>>();
       for(uint i = 0; i < libraries.size(); i++) {
-	cli.ProcessString("add_lib " + libraries[i]);
+     	cli.ProcessString("add_lib " + libraries[i]);
     	std::string tmpPrint = "from BOOST: add_lib " + libraries[i];
-    	printf("%s\n", tmpPrint.c_str());     
+	printf("%s\n", tmpPrint.c_str());     
       }
     }
 
@@ -286,12 +286,12 @@ int main(int argc, char* argv[])
 	printf("from TCLAP: %s\n", tmpPrint.c_str());
       }
     
-    //setup connections
+    // //setup connections
     for(int i = 0; i < connections_count; i++){
-      if(commandMap.count(connections[i])){
-	std::string tmpPrint = commandMap[connections[i]].as<std::string>();
-	printf("From BOOST: %s\n", tmpPrint.c_str());
-      } 
+    //   if(commandMap.count(connections[i])){
+    // 	std::string tmpPrint = commandMap[connections[i]].as<std::string>();
+    // 	printf("From BOOST: %s\n", tmpPrint.c_str());
+    //   } 
     }
     //Loop over all device types
     for(std::map<std::string,TCLAP::MultiArg<std::string>* >::iterator itDeviceType = connections2.begin(); itDeviceType != connections2.end(); itDeviceType++){
