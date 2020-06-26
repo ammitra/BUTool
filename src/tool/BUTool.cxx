@@ -221,6 +221,7 @@ int main(int argc, char* argv[])
 	// strcpy(cDesc, tmpDesc.c_str());
 	// options.add_options()
 	//   (cName, po::value<std::string>(), cDesc);
+	// delete[] cFlag;
 	// delete[] cName;
 	// delete[] cDesc;
 	// connections[connections_count] = *cFlag;
