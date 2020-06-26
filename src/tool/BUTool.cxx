@@ -224,7 +224,7 @@ int main(int argc, char* argv[])
 	delete[] cFlag;
 	delete[] cName;
 	delete[] cDesc;
-	connections[connections_count] = "test";//cFlag;
+	connections[connections_count] = tmpFlag;
 	connections_count++;
 	connections2[Devices[iDevice]] = new TCLAP::MultiArg<std::string>(CLI_flag,       //one char flag
 									 CLI_full_flag,  // full flag name
@@ -288,10 +288,10 @@ int main(int argc, char* argv[])
     
     // //setup connections
     for(int i = 0; i < connections_count; i++){
-    //   if(commandMap.count(connections[i])){
-    // 	std::string tmpPrint = commandMap[connections[i]].as<std::string>();
-    // 	printf("From BOOST: %s\n", tmpPrint.c_str());
-    //   } 
+      if(commandMap.count(connections[i])){
+    	std::string tmpPrint = commandMap[connections[i]].as<std::string>();
+    	printf("From BOOST: %s\n", tmpPrint.c_str());
+      } 
     }
     //Loop over all device types
     for(std::map<std::string,TCLAP::MultiArg<std::string>* >::iterator itDeviceType = connections2.begin(); itDeviceType != connections2.end(); itDeviceType++){
