@@ -224,7 +224,7 @@ int main(int argc, char* argv[])
 	delete[] cFlag;
 	delete[] cName;
 	delete[] cDesc;
-	connections[connections_count] = cFlag;
+	connections[connections_count] = "test";//cFlag;
 	connections_count++;
 	connections2[Devices[iDevice]] = new TCLAP::MultiArg<std::string>(CLI_flag,       //one char flag
 									 CLI_full_flag,  // full flag name
