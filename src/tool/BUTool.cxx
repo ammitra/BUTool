@@ -224,7 +224,7 @@ int main(int argc, char* argv[])
 	delete[] cFlag;
 	delete[] cName;
 	delete[] cDesc;
-	connections[connections_count] = tmpFlag;
+	connections.push_back(tmpFlag);
 	connections_count++;
 	connections2[Devices[iDevice]] = new TCLAP::MultiArg<std::string>(CLI_flag,       //one char flag
 									 CLI_full_flag,  // full flag name
@@ -271,7 +271,7 @@ int main(int argc, char* argv[])
     if(commandMap.count("libraries")) {
       std::vector<std::string> libraries = commandMap["libraries"].as<std::vector<std::string>>();
       for(uint i = 0; i < libraries.size(); i++) {
-     	cli.ProcessString("add_lib " + libraries[i]);
+     	//cli.ProcessString("add_lib " + libraries[i]);
     	std::string tmpPrint = "from BOOST: add_lib " + libraries[i];
 	printf("%s\n", tmpPrint.c_str());     
       }
