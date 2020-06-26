@@ -20,8 +20,8 @@
 #include <boost/program_options.hpp> //for configfile parsing
 
 #define BUTOOL_AUTOLOAD_LIBRARY_LIST "BUTOOL_AUTOLOAD_LIBRARY_LIST"
-#define DEFAULT_CONFIG_FILE          "/etc/BUTool.cfg" //path to default config file
-//#define DEFAULT_CONFIG_FILE "/home/mikekremer/work/misc/BUTool.cfg"
+//#define DEFAULT_CONFIG_FILE          "/etc/BUTool.cfg" //path to default config file
+#define DEFAULT_CONFIG_FILE "/home/mikekremer/work/misc/BUTool.cfg"
 
 using namespace BUTool;
 namespace po = boost::program_options; //makeing life easier for boost                                 
@@ -213,17 +213,17 @@ int main(int argc, char* argv[])
 	std::string tmpFlag = CLI_full_flag;
 	std::string tmpName = CLI_full_flag + "," + CLI_flag;
 	std::string tmpDesc = CLI_description;
-	// char *cFlag = new char[tmpFlag.size() + 1];
-	// char *cName = new char[tmpName.size() + 1];
-	// char *cDesc = new char[tmpDesc.size() + 1];
+	char *cFlag = new char[tmpFlag.size() + 1];
+	char *cName = new char[tmpName.size() + 1];
+	char *cDesc = new char[tmpDesc.size() + 1];
 	// strcpy(cFlag, tmpFlag.c_str());
 	// strcpy(cName, tmpName.c_str());
 	// strcpy(cDesc, tmpDesc.c_str());
 	// options.add_options()
 	//   (cName, po::value<std::string>(), cDesc);
-	// delete[] cFlag;
-	// delete[] cName;
-	// delete[] cDesc;
+	delete[] cFlag;
+	delete[] cName;
+	delete[] cDesc;
 	// connections[connections_count] = *cFlag;
 	// connections_count++;
 	connections2[Devices[iDevice]] = new TCLAP::MultiArg<std::string>(CLI_flag,       //one char flag
