@@ -20,8 +20,8 @@
 #include <boost/program_options.hpp> //for configfile parsing
 
 #define BUTOOL_AUTOLOAD_LIBRARY_LIST "BUTOOL_AUTOLOAD_LIBRARY_LIST"
-//#define DEFAULT_CONFIG_FILE          "/etc/BUTool.cfg" //path to default config file
-#define DEFAULT_CONFIG_FILE "/home/mikekremer/work/misc/BUTool.cfg"
+#define DEFAULT_CONFIG_FILE          "/etc/BUTool.cfg" //path to default config file
+//#define DEFAULT_CONFIG_FILE "/home/mikekremer/work/misc/BUTool.cfg"
 
 using namespace BUTool;
 namespace po = boost::program_options; //makeing life easier for boost                                 
@@ -344,7 +344,7 @@ int main(int argc, char* argv[])
   } catch (TCLAP::ArgException &e) {
     fprintf(stderr, "Error %s for arg %s\n",
 	    e.error().c_str(), e.argId().c_str());
-    return 0;
+    //return 0;
   }
 
 
