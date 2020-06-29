@@ -20,8 +20,8 @@
 #include <boost/program_options.hpp> //for configfile parsing
 
 #define BUTOOL_AUTOLOAD_LIBRARY_LIST "BUTOOL_AUTOLOAD_LIBRARY_LIST"
-#define DEFAULT_CONFIG_FILE          "/etc/BUTool.cfg" //path to default config file
-//#define DEFAULT_CONFIG_FILE "/home/mikekremer/work/misc/BUTool.cfg"
+//#define DEFAULT_CONFIG_FILE          "/etc/BUTool.cfg" //path to default config file
+#define DEFAULT_CONFIG_FILE "/home/mikekremer/work/misc/BUTool.cfg"
 
 using namespace BUTool;
 namespace po = boost::program_options; //makeing life easier for boost                                 
@@ -157,11 +157,14 @@ int main(int argc, char* argv[])
   //Create Command launcher (early, so we can set things)
   Launcher launcher;
 
+  std::vector<std::string> emptyVector = {"", ""};
+
   //Setup Boost programoptions
   po::options_description options("BUTool Options");
   options.add_options()
-    ("test,t",     "for testing")
-    ("script,X",  po::value<std::string>(), "Script filename")
+    ("help,h", "Help screen")
+    ("test,t",    po::value<std::string>()->implicit_value(""), "for testing")
+    ("script,X",  po::value<std::string>()->implicit_value(""), "Script filename")
     ("library,l", po::value<std::vector<std::string>>(), "Device library to add");
     
   //Load libraries from env variable
@@ -220,7 +223,7 @@ int main(int argc, char* argv[])
 	strcpy(cName, tmpName.c_str());
 	strcpy(cDesc, tmpDesc.c_str());
 	options.add_options()
-	  (cName, po::value<std::string>(), cDesc);
+	  (cName, po::value<std::string>()->implicit_value(""), cDesc);
 	delete[] cFlag;
 	delete[] cName;
 	delete[] cDesc;
@@ -243,29 +246,50 @@ int main(int argc, char* argv[])
     					   "string",               // type
     					   cmd);
     
-    //normal use case
     std::ifstream configFile(DEFAULT_CONFIG_FILE);
     po::variables_map commandMap;
     po::variables_map configMap;
-    try {
-    po::store(parse_command_line(argc, argv, options), commandMap);    //get options from command line, takes priority
+    
+    try { //get options from command line,
+      po::store(parse_command_line(argc, argv, options), commandMap);
     } catch (std::exception &e) {
       fprintf(stderr, "Error in BOOST parse_command_line: %s\n", e.what());
+      std::cout << options << '\n';
+      return 0;
     }
-    try {
-    po::store(parse_config_file(configFile,options,true), commandMap); //get options from configfile, fills gaps from above
+    try { //get options from config file
+      po::store(parse_config_file(configFile,options,true), configMap);
     } catch (std::exception &e) {
       fprintf(stderr, "Error in BOOST parse_config_file: %s\n", e.what());
+      std::cout << options << '\n';
+      return 0;
     }
 
-    if(commandMap.count("test")){
-      printf("commandMap.count(test) is true\n");
-      std::string tmpPrint = commandMap["test"].as<std::string>();
-      printf("from BOOST: test is %s\n", tmpPrint.c_str());
+    //help option
+    if(commandMap.count("help")){
+      std::cout << options << '\n';
+      return 0;
+    }
+
+    if(!commandMap.count("test")){
+      printf("running with no test option\n");
+    } else {
+      std::string userOpt = commandMap["test"].as<std::string>();
+      if(userOpt == ""){
+	std::string configOpt = configMap["test"].as<std::string>();
+	printf("running with config test option: %s\n", configOpt.c_str());
+      } else {
+	printf("running with user option: %s\n", userOpt.c_str());      
+      }
     }
 
     //Parse the command line arguments
     cmd.parse(argc,argv);
+
+    if(commandMap.count("libraries")){
+      std::vector<std::string> libraries = commandMap["libraries"].as<std::vector<std::string>>();
+    }
+
 
     //Load requested device libraries
     if(commandMap.count("libraries")) {
@@ -286,13 +310,19 @@ int main(int argc, char* argv[])
 	printf("from TCLAP: %s\n", tmpPrint.c_str());
       }
     
-    // //setup connections
+    //setup connections
     for(int i = 0; i < connections_count; i++){
       if(commandMap.count(connections[i])){
-    	std::string tmpPrint = commandMap[connections[i]].as<std::string>();
-    	printf("From BOOST: %s\n", tmpPrint.c_str());
-      } 
+	std::string userOpt = commandMap[connections[i]].as<std::string>();
+	if(userOpt == "") {
+	  std::string configOpt = configMap[connections[i]].as<std::string>();
+	  printf("BOOST config: add_device %s %s\n", connections[i].c_str(), configOpt.c_str());
+	} else {
+	  printf("BOOST user: add_device %s %s\n", connections[i].c_str(), userOpt.c_str());
+	}
+      }
     }
+
     //Loop over all device types
     for(std::map<std::string,TCLAP::MultiArg<std::string>* >::iterator itDeviceType = connections2.begin(); itDeviceType != connections2.end(); itDeviceType++){
       //Loop over connections requests for each device
@@ -301,11 +331,14 @@ int main(int argc, char* argv[])
 	std::string tmpPrint = "add_device " + itDeviceType->first + " " + *itDev;
 	printf("from TCLAAP: %s\n", tmpPrint.c_str());
       }
-    } /*this is what preprocesses the device adding*/
+    }
 
     //Load scripts
     if(scriptFile.getValue().size()){
       cli.ProcessFile(scriptFile.getValue());
+    }
+    if(commandMap.count("Script")){
+      //
     }
 
   } catch (TCLAP::ArgException &e) {
