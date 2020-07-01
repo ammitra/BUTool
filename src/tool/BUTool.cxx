@@ -28,7 +28,6 @@ namespace po = boost::program_options; //making life easier for boost
 
 #define DevFac BUTool::DeviceFactory::Instance()
 
-
 volatile bool running = true;
 
 void signal_handler(int sig){
@@ -61,17 +60,6 @@ void signal_handler(int sig){
     sigaction(SIGINT, &sa, NULL);
   }
 }
-
-
-
-// std::string LimitStringLines(s    //re-enable SIGINT capture
-// 			     struct sigaction sa;
-// 			     sa.sa_handler = signal_handler;
-// 			     sigemptyset(&sa.sa_mask);
-// 			     sigaction(SIGINT, &sa, NULL);    
-// 			     }
-//   }
-
 
 int main(int argc, char* argv[]) 
 {
@@ -291,10 +279,6 @@ int main(int argc, char* argv[])
 	    e.error().c_str(), e.argId().c_str());
     //return 0;
   }
-
-
-
-  //Do not need connections after this!
 
   //============================================================================
   //Main loop
