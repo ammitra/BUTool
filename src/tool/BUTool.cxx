@@ -162,10 +162,10 @@ int main(int argc, char* argv[])
   //Setup Boost programoptions
   po::options_description options("BUTool Options");
   options.add_options()
-    ("help,h", "Help screen")
+    ("help,h",                                                  "Help screen")
     ("test,t",    po::value<std::string>()->implicit_value(""), "for testing")
     ("script,X",  po::value<std::string>()->implicit_value(""), "Script filename")
-    ("library,l", po::value<std::vector<std::string>>(), "Device library to add");
+    ("library,l", po::value<std::string>()->implicit_value(""), "Device library to add");
     
   //Load libraries from env variable
   if (NULL != getenv(BUTOOL_AUTOLOAD_LIBRARY_LIST)){
@@ -188,6 +188,7 @@ int main(int argc, char* argv[])
 
   
   try {
+    /*
     TCLAP::CmdLine cmd("Tool for talking to HW modules.",
 		       ' ',
 		       "BUTool v1.0");    
@@ -199,8 +200,8 @@ int main(int argc, char* argv[])
 					    false,            //required
 					    std::string(""),  //Default is empty
 					    "string",         // type
-					    cmd);
-
+					    cmd); */
+					    
     //connections
     std::map<std::string,TCLAP::MultiArg<std::string>* >connections2;
     std::vector<std::string> connections;
@@ -229,22 +230,22 @@ int main(int argc, char* argv[])
 	delete[] cDesc;
 	connections.push_back(tmpFlag);
 	connections_count++;
-	connections2[Devices[iDevice]] = new TCLAP::MultiArg<std::string>(CLI_flag,       //one char flag
+	/*connections2[Devices[iDevice]] = new TCLAP::MultiArg<std::string>(CLI_flag,       //one char flag
 									 CLI_full_flag,  // full flag name
 									 CLI_description,//description
 									 false,          //required
 									 "string",       // type
-									 cmd);
+									 cmd);*/
       }
     }
     
     //Device libraries
-    TCLAP::MultiArg<std::string> libraries("l",                    //one char flag
+    /*TCLAP::MultiArg<std::string> libraries("l",                    //one char flag
     					   "add_library",          // full flag name
     					   "Device library to add",//description
     					   false,                  //required
     					   "string",               // type
-    					   cmd);
+    					   cmd); */
     
     std::ifstream configFile(DEFAULT_CONFIG_FILE);
     po::variables_map commandMap;
@@ -284,62 +285,75 @@ int main(int argc, char* argv[])
     }
 
     //Parse the command line arguments
-    cmd.parse(argc,argv);
-
-    if(commandMap.count("libraries")){
-      std::vector<std::string> libraries = commandMap["libraries"].as<std::vector<std::string>>();
+    if(commandMap.count("library")){
+      std::string commandString;
+      std::string userOpt = commandMap["library"].as<std::string>();
+      if(userOpt == "") {
+	printf("Using library defined in config file at %s\n", DEFAULT_CONFIG_FILE);
+	std::string configOpt = configMap["library"].as<std::string>();
+	commandString = "add_lib " + configOpt;
+      } else {
+	commandString = "add_lib " + userOpt;
+      }
+      cli.ProcessString(commandString);
     }
 
-
-    //Load requested device libraries
-    if(commandMap.count("libraries")) {
-      std::vector<std::string> libraries = commandMap["libraries"].as<std::vector<std::string>>();
-      for(uint i = 0; i < libraries.size(); i++) {
-     	//cli.ProcessString("add_lib " + libraries[i]);
-    	std::string tmpPrint = "from BOOST: add_lib " + libraries[i];
-	printf("%s\n", tmpPrint.c_str());     
-      }
-    }
-
-    for(std::vector<std::string>::const_iterator it = libraries.getValue().begin(); 
-	it != libraries.getValue().end();
-	it++)
-      {
-	cli.ProcessString("add_lib " + *it);
-	std::string tmpPrint = "add_lib " + *it;
-	printf("from TCLAP: %s\n", tmpPrint.c_str());
-      }
-    
     //setup connections
     for(int i = 0; i < connections_count; i++){
       if(commandMap.count(connections[i])){
+	std::string commandString;
 	std::string userOpt = commandMap[connections[i]].as<std::string>();
 	if(userOpt == "") {
+	  printf("Using connections defined in config file at %s\n", DEFAULT_CONFIG_FILE);
 	  std::string configOpt = configMap[connections[i]].as<std::string>();
-	  printf("BOOST config: add_device %s %s\n", connections[i].c_str(), configOpt.c_str());
+	  commandString = "add_device " + connections[i] + " " + configOpt;
+	  //printf("BOOST config: add_device %s %s\n", connections[i].c_str(), configOpt.c_str());
 	} else {
 	  printf("BOOST user: add_device %s %s\n", connections[i].c_str(), userOpt.c_str());
+	  //commandString = "add_device " + connections[i] + " " + userOpt;
 	}
+	cli.ProcessString(commandString);
       }
     }
 
-    //Loop over all device types
-    for(std::map<std::string,TCLAP::MultiArg<std::string>* >::iterator itDeviceType = connections2.begin(); itDeviceType != connections2.end(); itDeviceType++){
+    //Load scripts    
+    if(commandMap.count("script")){
+      std::string userOpt = commandMap["script"].as<std::string>();
+      if(userOpt == "") {
+	printf("Using script defined in config file at %s\n", DEFAULT_CONFIG_FILE);
+	std::string configOpt = configMap["script"].as<std::string>();
+	cli.ProcessFile(configOpt);
+      } else {
+	cli.ProcessFile(userOpt);
+      }
+    }
+
+    //TCLAP Methods for option handling
+    /*cmd.parse(argc,argv);
+
+      for(std::vector<std::string>::const_iterator it = libraries.getValue().begin(); 
+      it != libraries.getValue().end();
+      it++)
+      {
+      cli.ProcessString("add_lib " + *it);
+      std::string tmpPrint = "add_lib " + *it;
+      printf("from TCLAP: %s\n", tmpPrint.c_str());
+      }
+      
+      //Loop over all device types
+      for(std::map<std::string,TCLAP::MultiArg<std::string>* >::iterator itDeviceType = connections2.begin(); itDeviceType != connections2.end(); itDeviceType++){
       //Loop over connections requests for each device
       for(std::vector<std::string>::const_iterator itDev = itDeviceType->second->getValue().begin(); itDev != itDeviceType->second->getValue().end(); itDev++){
-	cli.ProcessString("add_device " + itDeviceType->first + " " +  *itDev);
-	std::string tmpPrint = "add_device " + itDeviceType->first + " " + *itDev;
-	printf("from TCLAAP: %s\n", tmpPrint.c_str());
+      cli.ProcessString("add_device " + itDeviceType->first + " " +  *itDev);
+      std::string tmpPrint = "add_device " + itDeviceType->first + " " + *itDev;
+      printf("from TCLAAP: %s\n", tmpPrint.c_str());
       }
-    }
-
-    //Load scripts
-    if(scriptFile.getValue().size()){
+      }
+     
+      //Run script
+      if(scriptFile.getValue().size()){
       cli.ProcessFile(scriptFile.getValue());
-    }
-    if(commandMap.count("Script")){
-      //
-    }
+      }*/
 
   } catch (TCLAP::ArgException &e) {
     fprintf(stderr, "Error %s for arg %s\n",
