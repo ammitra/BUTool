@@ -81,10 +81,14 @@ int main(int argc, char* argv[])
   //Setup Boost programoptions
   po::options_description options("BUTool Options");
   options.add_options()
-    ("help,h",                                                  "Help screen")
-    ("test,t",    po::value<std::string>()->implicit_value(""), "for testing")
-    ("script,X",  po::value<std::string>()->implicit_value(""), "Script filename")
-    ("library,l", po::value<std::string>()->implicit_value(""), "Device library to add");
+    ("help,h",
+     "Help screen")
+    ("script,X",
+     po::value<std::vector<std::string> >()->implicit_value(std::vector<std::string>(),""), 
+     "Script filename")
+    ("library,l",
+     po::value<std::vector<std::string> >()->implicit_value(std::vector<std::string>(),""),
+     "Device library to add");
     
   //Load libraries from env variable
   if (NULL != getenv(BUTOOL_AUTOLOAD_LIBRARY_LIST)){
@@ -102,25 +106,9 @@ int main(int argc, char* argv[])
       }
     }
   }
-
   
-
   
-  try {
-    /*
-    TCLAP::CmdLine cmd("Tool for talking to HW modules.",
-		       ' ',
-		       "BUTool v1.0");    
-    
-    //Script files
-    TCLAP::ValueArg<std::string> scriptFile("X",              //one char flag
-					    "script",         // full flag name
-					    "script filename",//description
-					    false,            //required
-					    std::string(""),  //Default is empty
-					    "string",         // type
-					    cmd); */
-					    
+  try {					    
     //connections
     std::map<std::string,TCLAP::MultiArg<std::string>* >connections2;
     std::vector<std::string> connections;
@@ -136,35 +124,22 @@ int main(int argc, char* argv[])
 	std::string tmpFlag = CLI_full_flag;
 	std::string tmpName = CLI_full_flag + "," + CLI_flag;
 	std::string tmpDesc = CLI_description;
-	char *cFlag = new char[tmpFlag.size() + 1];
+	//char *cFlag = new char[tmpFlag.size() + 1];
 	char *cName = new char[tmpName.size() + 1];
 	char *cDesc = new char[tmpDesc.size() + 1];
-	strcpy(cFlag, tmpFlag.c_str());
+	//strcpy(cFlag, tmpFlag.c_str());
 	strcpy(cName, tmpName.c_str());
 	strcpy(cDesc, tmpDesc.c_str());
 	options.add_options()
-	  (cName, po::value<std::string>()->implicit_value(""), cDesc);
-	delete[] cFlag;
+	  (cName,
+	   po::value<std::vector<std::string> >()->implicit_value(std::vector<std::string>(), ""),
+	   cDesc);
+	//delete[] cFlag;
 	delete[] cName;
 	delete[] cDesc;
 	connections.push_back(tmpFlag);
-	connections_count++;
-	/*connections2[Devices[iDevice]] = new TCLAP::MultiArg<std::string>(CLI_flag,       //one char flag
-									 CLI_full_flag,  // full flag name
-									 CLI_description,//description
-									 false,          //required
-									 "string",       // type
-									 cmd);*/
-      }
+	connections_count++;}
     }
-    
-    //Device libraries
-    /*TCLAP::MultiArg<std::string> libraries("l",                    //one char flag
-    					   "add_library",          // full flag name
-    					   "Device library to add",//description
-    					   false,                  //required
-    					   "string",               // type
-    					   cmd); */
     
     std::ifstream configFile(DEFAULT_CONFIG_FILE);
     po::variables_map commandMap;
@@ -191,88 +166,56 @@ int main(int argc, char* argv[])
       return 0;
     }
 
-    if(!commandMap.count("test")){
-      printf("running with no test option\n");
-    } else {
-      std::string userOpt = commandMap["test"].as<std::string>();
-      if(userOpt == ""){
-	std::string configOpt = configMap["test"].as<std::string>();
-	printf("running with config test option: %s\n", configOpt.c_str());
-      } else {
-	printf("running with user option: %s\n", userOpt.c_str());      
-      }
-    }
-
-    //Parse the command line arguments
+    //Add Libraries
     if(commandMap.count("library")){
       std::string commandString;
-      std::string userOpt = commandMap["library"].as<std::string>();
-      if(userOpt == "") {
-	printf("Using library defined in config file at %s\n", DEFAULT_CONFIG_FILE);
-	std::string configOpt = configMap["library"].as<std::string>();
-	commandString = "add_lib " + configOpt;
-      } else {
-	commandString = "add_lib " + userOpt;
+      std::vector<std::string> userOpt = commandMap["library"].as<std::vector<std::string> >();
+      if(!userOpt.size()){//No arguments, use config file arguments
+	printf("Using libraries defined in config file at %s\n", DEFAULT_CONFIG_FILE);
+	std::vector<std::string> configOpt = configMap["library"].as<std::vector<std::string> >();
+	commandString = "add_lib " + configOpt[0]; //this assumes config is just 1 argument
+	cli.ProcessString(commandString);
+      } else {//iterate through arguments on commandline
+	for(uint i = 0; i < userOpt.size(); i++){
+	  commandString = "add_lib " + userOpt[i];
+	  cli.ProcessString(commandString);
+	}
       }
-      cli.ProcessString(commandString);
     }
 
     //setup connections
     for(int i = 0; i < connections_count; i++){
       if(commandMap.count(connections[i])){
 	std::string commandString;
-	std::string userOpt = commandMap[connections[i]].as<std::string>();
-	if(userOpt == "") {
+	std::vector<std::string> userOpt = commandMap[connections[i]].as<std::vector<std::string> >();
+	if(!userOpt.size()){//No arguments, use config file arugments
 	  printf("Using connections defined in config file at %s\n", DEFAULT_CONFIG_FILE);
-	  std::string configOpt = configMap[connections[i]].as<std::string>();
-	  commandString = "add_device " + connections[i] + " " + configOpt;
-	  //printf("BOOST config: add_device %s %s\n", connections[i].c_str(), configOpt.c_str());
-	} else {
-	  printf("BOOST user: add_device %s %s\n", connections[i].c_str(), userOpt.c_str());
-	  //commandString = "add_device " + connections[i] + " " + userOpt;
+	  std::vector<std::string> configOpt = configMap[connections[i]].as<std::vector<std::string> >();
+	  commandString = "add_device " + connections[i] + " " + configOpt[0];
+	  cli.ProcessString(commandString);
+	} else {//iterate through arguments on commandLine
+	  commandString = "add_device " + connections[i];
+	  for(uint j = 0; j < userOpt.size(); j++){
+	    commandString = "add_device " + connections[i] + " " + userOpt[j];
+	    cli.ProcessString(commandString);
+	  }
 	}
-	cli.ProcessString(commandString);
       }
     }
 
     //Load scripts    
     if(commandMap.count("script")){
-      std::string userOpt = commandMap["script"].as<std::string>();
-      if(userOpt == "") {
+      std::vector<std::string> userOpt = commandMap["script"].as<std::vector<std::string> >();
+      if(!userOpt.size()) {//No arguments, use config file arguments
 	printf("Using script defined in config file at %s\n", DEFAULT_CONFIG_FILE);
-	std::string configOpt = configMap["script"].as<std::string>();
-	cli.ProcessFile(configOpt);
-      } else {
-	cli.ProcessFile(userOpt);
+	std::vector<std::string> configOpt = configMap["script"].as<std::vector<std::string> >();
+	cli.ProcessFile(configOpt[0]);
+      } else {//iterate through arguments on commandLine
+	for(uint i = 0; i < userOpt.size(); i++){
+	  cli.ProcessFile(userOpt[i]);
+	}
       }
     }
-
-    //TCLAP Methods for option handling
-    /*cmd.parse(argc,argv);
-
-      for(std::vector<std::string>::const_iterator it = libraries.getValue().begin(); 
-      it != libraries.getValue().end();
-      it++)
-      {
-      cli.ProcessString("add_lib " + *it);
-      std::string tmpPrint = "add_lib " + *it;
-      printf("from TCLAP: %s\n", tmpPrint.c_str());
-      }
-      
-      //Loop over all device types
-      for(std::map<std::string,TCLAP::MultiArg<std::string>* >::iterator itDeviceType = connections2.begin(); itDeviceType != connections2.end(); itDeviceType++){
-      //Loop over connections requests for each device
-      for(std::vector<std::string>::const_iterator itDev = itDeviceType->second->getValue().begin(); itDev != itDeviceType->second->getValue().end(); itDev++){
-      cli.ProcessString("add_device " + itDeviceType->first + " " +  *itDev);
-      std::string tmpPrint = "add_device " + itDeviceType->first + " " + *itDev;
-      printf("from TCLAAP: %s\n", tmpPrint.c_str());
-      }
-      }
-     
-      //Run script
-      if(scriptFile.getValue().size()){
-      cli.ProcessFile(scriptFile.getValue());
-      }*/
 
   } catch (TCLAP::ArgException &e) {
     fprintf(stderr, "Error %s for arg %s\n",
