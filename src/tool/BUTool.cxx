@@ -20,7 +20,7 @@
 #include <boost/program_options.hpp> //for configfile parsing
 
 #define BUTOOL_AUTOLOAD_LIBRARY_LIST "BUTOOL_AUTOLOAD_LIBRARY_LIST"
-#define DEFAULT_CONFIG_FILE          "/etc/BUTool.cfg" //path to default config file
+#define DEFAULT_CONFIG_FILE          "/etc/BUTool" //path to default config file
 //#define DEFAULT_CONFIG_FILE "/home/mikekremer/work/misc/BUTool.cfg"
 
 using namespace BUTool;
@@ -70,33 +70,78 @@ int main(int argc, char* argv[])
   sigaction(SIGINT, &sa, NULL);
   sigaction(SIGALRM,&sa, NULL);
 
-  //Create CLI
+  //Create CLI and Create Command launcher (early, so we can set things)
   CLI cli;
-
-  //Create Command launcher (early, so we can set things)
   Launcher launcher;
 
-  std::vector<std::string> emptyVector = {"", ""};
-
+  //============================================================================
   //Setup Boost programoptions
+  //============================================================================
   po::options_description options("BUTool Options");
   options.add_options()
-    ("help,h",
-     "Help screen")
-    ("script,X",
-     po::value<std::vector<std::string> >()->implicit_value(std::vector<std::string>(),""), 
-     "Script filename")
-    ("library,l",
-     po::value<std::vector<std::string> >()->implicit_value(std::vector<std::string>(),""),
-     "Device library to add");
+    ("help,h",    "Help screen")
+    ("LIB,L",     po::value<std::vector<std::string> >(), "Libraries automatically loaded")
+    ("script,X",  po::value<std::vector<std::string> >()->implicit_value(std::vector<std::string>(),""), "Script filename")
+    ("library,l", po::value<std::vector<std::string> >()->implicit_value(std::vector<std::string>(),""), "Device library to add");
+      
+  //Load connections as program options based on DevFac
+  std::vector<std::string> connections;
+  int connections_count = 0; 
+  std::vector<std::string> Devices = DevFac->GetDeviceNames();
+  for(size_t iDevice = 0; iDevice < Devices.size(); iDevice++){
+    std::string  CLI_flag;      
+    std::string  CLI_full_flag;
+    std::string  CLI_description;  
+    if(DevFac->CLIArgs(Devices[iDevice],CLI_flag,CLI_full_flag,CLI_description)){
+      std::string tmpName = CLI_full_flag + "," + CLI_flag;
+      char *cName = new char[tmpName.size() + 1];
+      char *cDesc = new char[CLI_description.size() + 1];
+      strcpy(cName, tmpName.c_str());
+      strcpy(cDesc, CLI_description.c_str());
+      options.add_options()
+	(cName, po::value<std::vector<std::string> >()->implicit_value(std::vector<std::string>(), ""), cDesc);
+      delete[] cName;
+      delete[] cDesc;
+      connections.push_back(CLI_full_flag);
+      connections_count++;
+    }
+  }
     
-  //Load libraries from env variable
-  if (NULL != getenv(BUTOOL_AUTOLOAD_LIBRARY_LIST)){
-    std::vector<std::string> libFiles = splitString(getenv(BUTOOL_AUTOLOAD_LIBRARY_LIST),":");
-    for(size_t iLibFile = 0 ; iLibFile < libFiles.size() ; iLibFile++){
-      //Add a add_lib command for each library
-      cli.ProcessString("add_lib " + libFiles[iLibFile]);      
-      //Ask the CLI to process this command.
+  std::ifstream configFile(DEFAULT_CONFIG_FILE); //Open config from default path
+  po::variables_map commandMap; //container for command line arguments
+  po::variables_map configMap; //container for config file arguments
+    
+  try { //get options from command line,
+    po::store(parse_command_line(argc, argv, options), commandMap);
+  } catch (std::exception &e) {
+    fprintf(stderr, "Error in BOOST parse_command_line: %s\n", e.what());
+    std::cout << options << '\n';
+    return 0;
+  }
+  try { //get options from config file
+    po::store(parse_config_file(configFile,options,true), configMap);
+  } catch (std::exception &e) {
+    fprintf(stderr, "Error in BOOST parse_config_file: %s\n", e.what());
+    std::cout << options << '\n';
+    return 0;
+  }
+
+  //============================================================================
+  //Run Program Options
+  //============================================================================
+  //help option
+  if(commandMap.count("help")){
+    std::cout << options << '\n';
+    return 0;
+  }
+
+  //Libraries to auto load defined in config
+  if (configMap.count("autoLibrary")) {
+    std::string commandString; 
+    std::vector<std::string> configOpt = configMap["LIB"].as<std::vector<std::string> >(); //get args from config file
+    for (uint i = 0; i < configOpt.size(); i++){ //iterate through args
+      commandString = "add_lib " + configOpt[i];
+      cli.ProcessString(commandString);
       std::vector<std::string> command = cli.GetInput(&launcher);
       //If the command was well formed, tell the launcher to launch it. 
       if(command.size() > 0){
@@ -106,121 +151,83 @@ int main(int argc, char* argv[])
       }
     }
   }
-  
-  
-  try {					    
-    //connections
-    std::map<std::string,TCLAP::MultiArg<std::string>* >connections2;
-    std::vector<std::string> connections;
-    int connections_count = 0;
 
-    std::vector<std::string> Devices = DevFac->GetDeviceNames();
-    for(size_t iDevice = 0; iDevice < Devices.size(); iDevice++){
-      std::string  CLI_flag;      
-      std::string  CLI_full_flag;
-      std::string  CLI_description;
-      
-      if(DevFac->CLIArgs(Devices[iDevice],CLI_flag,CLI_full_flag,CLI_description)){
-	std::string tmpFlag = CLI_full_flag;
-	std::string tmpName = CLI_full_flag + "," + CLI_flag;
-	std::string tmpDesc = CLI_description;
-	//char *cFlag = new char[tmpFlag.size() + 1];
-	char *cName = new char[tmpName.size() + 1];
-	char *cDesc = new char[tmpDesc.size() + 1];
-	//strcpy(cFlag, tmpFlag.c_str());
-	strcpy(cName, tmpName.c_str());
-	strcpy(cDesc, tmpDesc.c_str());
-	options.add_options()
-	  (cName,
-	   po::value<std::vector<std::string> >()->implicit_value(std::vector<std::string>(), ""),
-	   cDesc);
-	//delete[] cFlag;
-	delete[] cName;
-	delete[] cDesc;
-	connections.push_back(tmpFlag);
-	connections_count++;}
-    }
+  //Libraries defined in command line or config
+  if(commandMap.count("library")){ //If library flag is found
+    std::string commandString;
+    std::vector<std::string> userOpt = commandMap["library"].as<std::vector<std::string> >(); //get args from command line
     
-    std::ifstream configFile(DEFAULT_CONFIG_FILE);
-    po::variables_map commandMap;
-    po::variables_map configMap;
-    
-    try { //get options from command line,
-      po::store(parse_command_line(argc, argv, options), commandMap);
-    } catch (std::exception &e) {
-      fprintf(stderr, "Error in BOOST parse_command_line: %s\n", e.what());
-      std::cout << options << '\n';
-      return 0;
-    }
-    try { //get options from config file
-      po::store(parse_config_file(configFile,options,true), configMap);
-    } catch (std::exception &e) {
-      fprintf(stderr, "Error in BOOST parse_config_file: %s\n", e.what());
-      std::cout << options << '\n';
-      return 0;
-    }
-
-    //help option
-    if(commandMap.count("help")){
-      std::cout << options << '\n';
-      return 0;
-    }
-
-    //Add Libraries
-    if(commandMap.count("library")){
-      std::string commandString;
-      std::vector<std::string> userOpt = commandMap["library"].as<std::vector<std::string> >();
-      if(!userOpt.size()){//No arguments, use config file arguments
+    if(!userOpt.size()){//flag present with no arguments, use config file arguments
+      try {
 	printf("Using libraries defined in config file at %s\n", DEFAULT_CONFIG_FILE);
-	std::vector<std::string> configOpt = configMap["library"].as<std::vector<std::string> >();
-	commandString = "add_lib " + configOpt[0]; //this assumes config is just 1 argument
-	cli.ProcessString(commandString);
-      } else {//iterate through arguments on commandline
-	for(uint i = 0; i < userOpt.size(); i++){
-	  commandString = "add_lib " + userOpt[i];
+	std::vector<std::string> configOpt = configMap["library"].as<std::vector<std::string> >(); //get args from config file
+	for (uint i = 0; i < configOpt.size(); i++) {//iterate through arguments in config file
+	  commandString = "add_lib " + configOpt[i];
 	  cli.ProcessString(commandString);
 	}
+      } catch (std::exception &e) { //tried to use argument from config file but arg is not defined config file
+	fprintf(stderr, "ERROR getting library from config file at %s: %s\n", DEFAULT_CONFIG_FILE, e.what());
+	return 0;
+      }
+    
+    } else {//iterate through arguments on commandline
+      for(uint i = 0; i < userOpt.size(); i++){
+	commandString = "add_lib " + userOpt[i];
+	cli.ProcessString(commandString);
       }
     }
+  }
 
-    //setup connections
-    for(int i = 0; i < connections_count; i++){
-      if(commandMap.count(connections[i])){
-	std::string commandString;
-	std::vector<std::string> userOpt = commandMap[connections[i]].as<std::vector<std::string> >();
-	if(!userOpt.size()){//No arguments, use config file arugments
+  //setup connections
+  for(int i = 0; i < connections_count; i++){
+    if(commandMap.count(connections[i])){
+      std::string commandString;
+      std::vector<std::string> userOpt = commandMap[connections[i]].as<std::vector<std::string> >(); //get args from command line
+
+      if(!userOpt.size()){//flag present with no arguments, use config file arguments
+	try {
 	  printf("Using connections defined in config file at %s\n", DEFAULT_CONFIG_FILE);
-	  std::vector<std::string> configOpt = configMap[connections[i]].as<std::vector<std::string> >();
-	  commandString = "add_device " + connections[i] + " " + configOpt[0];
-	  cli.ProcessString(commandString);
-	} else {//iterate through arguments on commandLine
-	  commandString = "add_device " + connections[i];
-	  for(uint j = 0; j < userOpt.size(); j++){
-	    commandString = "add_device " + connections[i] + " " + userOpt[j];
+	  std::vector<std::string> configOpt = configMap[connections[i]].as<std::vector<std::string> >(); //get args from config file
+	  for (uint j = 0; j < configOpt.size(); j++) {//iterate through arguments in config file
+	    commandString = "add_device " + connections[i] + " " + configOpt[j];
 	    cli.ProcessString(commandString);
 	  }
+	} catch (std::exception &e) { //tried to use argument from config file but arg is not defined config file
+	  fprintf(stderr, "ERROR getting %s from config file at %s: %s\n", connections[i].c_str(), DEFAULT_CONFIG_FILE, e.what());
+	  return 0;
 	}
-      }
-    }
-
-    //Load scripts    
-    if(commandMap.count("script")){
-      std::vector<std::string> userOpt = commandMap["script"].as<std::vector<std::string> >();
-      if(!userOpt.size()) {//No arguments, use config file arguments
-	printf("Using script defined in config file at %s\n", DEFAULT_CONFIG_FILE);
-	std::vector<std::string> configOpt = configMap["script"].as<std::vector<std::string> >();
-	cli.ProcessFile(configOpt[0]);
+      
       } else {//iterate through arguments on commandLine
-	for(uint i = 0; i < userOpt.size(); i++){
-	  cli.ProcessFile(userOpt[i]);
+	commandString = "add_device " + connections[i];
+	for(uint j = 0; j < userOpt.size(); j++){
+	  commandString = "add_device " + connections[i] + " " + userOpt[j];
+	  cli.ProcessString(commandString);
 	}
       }
     }
+  }
 
-  } catch (TCLAP::ArgException &e) {
-    fprintf(stderr, "Error %s for arg %s\n",
-	    e.error().c_str(), e.argId().c_str());
-    //return 0;
+  //Load scripts    
+  if(commandMap.count("script")){
+    std::vector<std::string> userOpt = commandMap["script"].as<std::vector<std::string> >(); //get args from command line
+
+    if(!userOpt.size()) {//flag present with no arguments, use config file arguments
+      try {
+	printf("Using script defined in config file at %s\n", DEFAULT_CONFIG_FILE);
+	std::vector<std::string> configOpt = configMap["script"].as<std::vector<std::string> >(); //get args from config file
+	for (uint i = 0; i < configOpt.size(); i++) {//iterate through arguments in config file
+	  cli.ProcessFile(configOpt[0]);
+	}
+      } catch (std::exception &e) { //tried to use argument from config file but arg is not defined config file
+	fprintf(stderr, "ERROR getting script from config file at %s: %s\n", DEFAULT_CONFIG_FILE, e.what());
+	return 0;
+      }
+    
+    } else {//iterate through arguments on commandLine
+      for(uint i = 0; i < userOpt.size(); i++){
+	cli.ProcessFile(userOpt[i]);
+      }
+    }
   }
 
   //============================================================================
