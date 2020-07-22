@@ -93,7 +93,7 @@ int main(int argc, char* argv[])
   }
 
   //Libraries to auto load defined in config
-  if (configMap.count("autoLibrary")) {
+  if (configMap.count("LIB")) {
     std::string commandString; 
     std::vector<std::string> configOpt = configMap["LIB"].as<std::vector<std::string> >(); //get args from config file
     for (uint i = 0; i < configOpt.size(); i++){ //iterate through args
