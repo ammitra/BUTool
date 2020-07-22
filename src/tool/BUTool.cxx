@@ -71,29 +71,8 @@ int main(int argc, char* argv[])
   CLI cli;
   Launcher launcher;
 
-  //============================================================================
-  //Setup Boost programoptions
-  //============================================================================
-  po::options_description options("BUTool Options");
-  std::ifstream configFile(DEFAULT_CONFIG_FILE); //Open config from default path
-  po::variables_map commandMap; //container for command line arguments
-  po::variables_map configMap; //container for config file arguments
-  options.add_options()
-    ("help,h",    "Help screen")
-    ("LIB,L",     po::value<std::vector<std::string> >(), "Libraries automatically loaded")
-    ("script,X",  po::value<std::vector<std::string> >()->implicit_value(std::vector<std::string>(),""), "Script filename")
-    ("library,l", po::value<std::vector<std::string> >()->implicit_value(std::vector<std::string>(),""), "Device library to add");
-
-  try { //get options from config file
-    po::store(parse_config_file(configFile,options,true), configMap);
-  } catch (std::exception &e) {
-    fprintf(stderr, "Error in BOOST parse_config_file: %s\n", e.what());
-    std::cout << options << '\n';
-    return 0;
-  }
-
   //Libraries to auto load defined in config
-  if (configMap.count("LIB")) {
+  if (configMap.count("autoLibrary")) {
     std::string commandString; 
     std::vector<std::string> configOpt = configMap["LIB"].as<std::vector<std::string> >(); //get args from config file
     for (uint i = 0; i < configOpt.size(); i++){ //iterate through args
@@ -102,12 +81,40 @@ int main(int argc, char* argv[])
       std::vector<std::string> command = cli.GetInput(&launcher);
       //If the command was well formed, tell the launcher to launch it. 
       if(command.size() > 0){
-	//Launch command function (for add lib)
-	launcher.EvaluateCommand(command);
-	//Ignore the return value.  It eithe works or not.
+  	//Launch command function (for add lib)
+  	launcher.EvaluateCommand(command);
+  	//Ignore the return value.  It eithe works or not.
       }
     }
   }
+
+  //============================================================================
+  //Setup Boost programoptions
+  //============================================================================
+  po::options_description options("BUTool Options");
+  options.add_options()
+    ("help,h",    "Help screen")
+    ("LIB,L",     po::value<std::vector<std::string> >(), "Libraries automatically loaded")
+    ("script,X",  po::value<std::vector<std::string> >()->implicit_value(std::vector<std::string>(),""), "Script filename")
+    ("library,l", po::value<std::vector<std::string> >()->implicit_value(std::vector<std::string>(),""), "Device library to add");
+
+  /* GET THIS WORKING TO AUTOLOAD LIBRARIES DEFINED IN CONFIG FILE */
+  //Libraries to auto load defined in config
+  // if (configMap.count("LIB")) {
+  //   std::string commandString; 
+  //   std::vector<std::string> configOpt = configMap["LIB"].as<std::vector<std::string> >(); //get args from config file
+  //   for (uint i = 0; i < configOpt.size(); i++){ //iterate through args
+  //     commandString = "add_lib " + configOpt[i];
+  //     cli.ProcessString(commandString);
+  //     std::vector<std::string> command = cli.GetInput(&launcher);
+  //     //If the command was well formed, tell the launcher to launch it. 
+  //     if(command.size() > 0){
+  // 	//Launch command function (for add lib)
+  // 	launcher.EvaluateCommand(command);
+  // 	//Ignore the return value.  It eithe works or not.
+  //     }
+  //   }
+  // }
       
   //Load connections as program options based on DevFac
   std::vector<std::string> connections;
@@ -131,6 +138,14 @@ int main(int argc, char* argv[])
       connections_count++;
     }
   }
+
+
+  //============================================================================
+  //Run Program Options
+  //============================================================================
+  std::ifstream configFile(DEFAULT_CONFIG_FILE); //Open config from default path
+  po::variables_map commandMap; //container for command line arguments
+  po::variables_map configMap; //container for config file arguments
     
   try { //get options from command line,
     po::store(parse_command_line(argc, argv, options), commandMap);
@@ -147,31 +162,11 @@ int main(int argc, char* argv[])
     return 0;
   }
 
-  //============================================================================
-  //Run Program Options
-  //============================================================================
   //help option
   if(commandMap.count("help")){
     std::cout << options << '\n';
     return 0;
   }
-
-  // //Libraries to auto load defined in config
-  // if (configMap.count("autoLibrary")) {
-  //   std::string commandString; 
-  //   std::vector<std::string> configOpt = configMap["LIB"].as<std::vector<std::string> >(); //get args from config file
-  //   for (uint i = 0; i < configOpt.size(); i++){ //iterate through args
-  //     commandString = "add_lib " + configOpt[i];
-  //     cli.ProcessString(commandString);
-  //     std::vector<std::string> command = cli.GetInput(&launcher);
-  //     //If the command was well formed, tell the launcher to launch it. 
-  //     if(command.size() > 0){
-  // 	//Launch command function (for add lib)
-  // 	launcher.EvaluateCommand(command);
-  // 	//Ignore the return value.  It eithe works or not.
-  //     }
-  //   }
-  // }
 
   //Libraries defined in command line or config
   if(commandMap.count("library")){ //If library flag is found
