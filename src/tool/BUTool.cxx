@@ -71,19 +71,45 @@ int main(int argc, char* argv[])
   CLI cli;
   Launcher launcher;
 
-  //Libraries to auto load defined in config
-  if (configMap.count("autoLibrary")) {
-    std::string commandString; 
-    std::vector<std::string> configOpt = configMap["LIB"].as<std::vector<std::string> >(); //get args from config file
-    for (uint i = 0; i < configOpt.size(); i++){ //iterate through args
-      commandString = "add_lib " + configOpt[i];
-      cli.ProcessString(commandString);
+  po::options_description autoLibraries("AUTOLOAD");
+  autoLibraries.add_options()
+    ("LIB,L", po::value<std::vector<std::string> >(), "Libraries automatically loaded");
+    
+  std::ifstream librariesConfigFile(DEFAULT_CONFIG_FILE); //Open config from default path
+  po::variables_map librariesConfigMap; //container for config file arguments
+    
+  try { //get enviornmental libraries from config file
+    po::store(parse_config_file(librariesConfigFile,autoLibraries,true), librariesConfigMap);
+  } catch (std::exception &e) {
+    fprintf(stderr, "Error in BOOST parse_config_file: %s\n", e.what());
+    std::cout << autoLibraries << '\n';
+    return 0;
+  }
+
+  if(librariesConfigMap.count("LIB")) { //libraries are defined in configfile
+    std::vector<std::string> libFiles = librariesConfigMap["LIB"].as<std::vector<std::string> >(); //get args from config file
+    for(uint iLibFile = 0; iLibFile < libFiles.size(); iLibFile++) {
+      cli.ProcessString("add_lib " + libFiles[iLibFile]);
+      std::vector<std::string> command = cli.GetInput(&launcher);
+      if(command.size() >> 0){
+	launcher.EvaluateCommand(command);
+      }
+    }
+  }
+  
+  //Load libraries from env variable
+  if (NULL != getenv(BUTOOL_AUTOLOAD_LIBRARY_LIST)){
+    std::vector<std::string> libFiles = splitString(getenv(BUTOOL_AUTOLOAD_LIBRARY_LIST),":");
+    for(size_t iLibFile = 0 ; iLibFile < libFiles.size() ; iLibFile++){
+      //Add a add_lib command for each library
+      cli.ProcessString("add_lib " + libFiles[iLibFile]);      
+      //Ask the CLI to process this command.
       std::vector<std::string> command = cli.GetInput(&launcher);
       //If the command was well formed, tell the launcher to launch it. 
       if(command.size() > 0){
-  	//Launch command function (for add lib)
-  	launcher.EvaluateCommand(command);
-  	//Ignore the return value.  It eithe works or not.
+	//Launch command function (for add lib)
+	launcher.EvaluateCommand(command);
+	//Ignore the return value.  It eithe works or not.
       }
     }
   }
@@ -94,27 +120,9 @@ int main(int argc, char* argv[])
   po::options_description options("BUTool Options");
   options.add_options()
     ("help,h",    "Help screen")
-    ("LIB,L",     po::value<std::vector<std::string> >(), "Libraries automatically loaded")
+    //("LIB,L",     po::value<std::vector<std::string> >(), "Libraries automatically loaded")
     ("script,X",  po::value<std::vector<std::string> >()->implicit_value(std::vector<std::string>(),""), "Script filename")
     ("library,l", po::value<std::vector<std::string> >()->implicit_value(std::vector<std::string>(),""), "Device library to add");
-
-  /* GET THIS WORKING TO AUTOLOAD LIBRARIES DEFINED IN CONFIG FILE */
-  //Libraries to auto load defined in config
-  // if (configMap.count("LIB")) {
-  //   std::string commandString; 
-  //   std::vector<std::string> configOpt = configMap["LIB"].as<std::vector<std::string> >(); //get args from config file
-  //   for (uint i = 0; i < configOpt.size(); i++){ //iterate through args
-  //     commandString = "add_lib " + configOpt[i];
-  //     cli.ProcessString(commandString);
-  //     std::vector<std::string> command = cli.GetInput(&launcher);
-  //     //If the command was well formed, tell the launcher to launch it. 
-  //     if(command.size() > 0){
-  // 	//Launch command function (for add lib)
-  // 	launcher.EvaluateCommand(command);
-  // 	//Ignore the return value.  It eithe works or not.
-  //     }
-  //   }
-  // }
       
   //Load connections as program options based on DevFac
   std::vector<std::string> connections;
