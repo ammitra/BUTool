@@ -4,27 +4,25 @@
 #include <sstream>
 #include <stdlib.h>
 
-//TCLAP parser
-#include <tclap/CmdLine.h>
+//BUTool libraries
 #include <BUTool/Launcher.hh>
 #include <BUTool/CLI.hh>
 #include <BUTool/CommandReturn.hh>
 #include <BUTool/DeviceFactory.hh>
-
 #include <BUException/ExceptionBase.hh>
 
 #include <readline/readline.h> //for rl_delete_text
 #include <signal.h> //signals
 
+//Boost program options
 #include <BUTool/helpers/parseHelpers.hh>
 #include <boost/program_options.hpp> //for configfile parsing
+#define DEFAULT_CONFIG_FILE "/etc/BUTool" //path to default config file
+namespace po = boost::program_options; //making life easier for boost                                 
 
 #define DevFac BUTool::DeviceFactory::Instance()
-#define BUTOOL_AUTOLOAD_LIBRARY_LIST "BUTOOL_AUTOLOAD_LIBRARY_LIST"
-#define DEFAULT_CONFIG_FILE          "/etc/BUTool" //path to default config file
 
 using namespace BUTool;
-namespace po = boost::program_options; //making life easier for boost                                 
 
 volatile bool running = true;
 
@@ -96,23 +94,6 @@ int main(int argc, char* argv[])
       }
     }
   }
-  
-  //Load libraries from env variable
-  if (NULL != getenv(BUTOOL_AUTOLOAD_LIBRARY_LIST)){
-    std::vector<std::string> libFiles = splitString(getenv(BUTOOL_AUTOLOAD_LIBRARY_LIST),":");
-    for(size_t iLibFile = 0 ; iLibFile < libFiles.size() ; iLibFile++){
-      //Add a add_lib command for each library
-      cli.ProcessString("add_lib " + libFiles[iLibFile]);      
-      //Ask the CLI to process this command.
-      std::vector<std::string> command = cli.GetInput(&launcher);
-      //If the command was well formed, tell the launcher to launch it. 
-      if(command.size() > 0){
-	//Launch command function (for add lib)
-	launcher.EvaluateCommand(command);
-	//Ignore the return value.  It eithe works or not.
-      }
-    }
-  }
 
   //============================================================================
   //Setup Boost programoptions
@@ -120,7 +101,6 @@ int main(int argc, char* argv[])
   po::options_description options("BUTool Options");
   options.add_options()
     ("help,h",    "Help screen")
-    //("LIB,L",     po::value<std::vector<std::string> >(), "Libraries automatically loaded")
     ("script,X",  po::value<std::vector<std::string> >()->implicit_value(std::vector<std::string>(),""), "Script filename")
     ("library,l", po::value<std::vector<std::string> >()->implicit_value(std::vector<std::string>(),""), "Device library to add");
       
@@ -146,7 +126,6 @@ int main(int argc, char* argv[])
       connections_count++;
     }
   }
-
 
   //============================================================================
   //Run Program Options
@@ -183,7 +162,6 @@ int main(int argc, char* argv[])
     
     if(!userOpt.size()){//flag present with no arguments, use config file arguments
       try {
-	printf("Using libraries defined in config file at %s\n", DEFAULT_CONFIG_FILE);
 	std::vector<std::string> configOpt = configMap["library"].as<std::vector<std::string> >(); //get args from config file
 	for (uint i = 0; i < configOpt.size(); i++) {//iterate through arguments in config file
 	  commandString = "add_lib " + configOpt[i];
@@ -210,7 +188,6 @@ int main(int argc, char* argv[])
 
       if(!userOpt.size()){//flag present with no arguments, use config file arguments
 	try {
-	  printf("Using connections defined in config file at %s\n", DEFAULT_CONFIG_FILE);
 	  std::vector<std::string> configOpt = configMap[connections[i]].as<std::vector<std::string> >(); //get args from config file
 	  for (uint j = 0; j < configOpt.size(); j++) {//iterate through arguments in config file
 	    commandString = "add_device " + connections[i] + " " + configOpt[j];
@@ -237,7 +214,6 @@ int main(int argc, char* argv[])
 
     if(!userOpt.size()) {//flag present with no arguments, use config file arguments
       try {
-	printf("Using script defined in config file at %s\n", DEFAULT_CONFIG_FILE);
 	std::vector<std::string> configOpt = configMap["script"].as<std::vector<std::string> >(); //get args from config file
 	for (uint i = 0; i < configOpt.size(); i++) {//iterate through arguments in config file
 	  cli.ProcessFile(configOpt[0]);
