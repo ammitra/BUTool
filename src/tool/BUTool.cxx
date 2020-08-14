@@ -186,7 +186,7 @@ int main(int argc, char* argv[])
     std::vector<std::string> defaultArgs = configMap["DEFAULT_ARGS"].as<std::vector<std::string> >();
     for (uint iDefault = 0; iDefault < defaultArgs.size(); iDefault++){
       std::string commandString = "add_device " + defaultArgs[iDefault];
-      std::cout << commandString << std::endl;
+      cli.ProcessString(commandString); //std::cout << commandString << std::endl;
     }
   }
 
@@ -208,7 +208,7 @@ int main(int argc, char* argv[])
 	  if(deviceName == connections[iDevice]){
 	    //copy this DEFAULT_ARG and run it
 	    std::string commandString = "add_device " + configOpt[iDefault];
-	    std::cout << commandString << std::endl;
+	    cli.ProcessString(commandString);//std::cout << commandString << std::endl;
 	  }
 	}
 	//flag on command line is found with user options so run it
@@ -216,7 +216,7 @@ int main(int argc, char* argv[])
 	//run user options
 	for (uint iUser = 0; iUser < userOpt.size(); iUser++) {
 	  std::string commandString = "add_device " + connections[iDevice] + " " + userOpt[iUser];
-	  std::cout << commandString << std::endl;
+	  cli.ProcessString(commandString);//std::cout << commandString << std::endl;
 	}
       }
     }
