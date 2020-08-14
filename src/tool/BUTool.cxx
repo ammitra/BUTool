@@ -101,8 +101,9 @@ int main(int argc, char* argv[])
   po::options_description options("BUTool Options");
   options.add_options()
     ("help,h",    "Help screen")
-    ("script,X",  po::value<std::vector<std::string> >()->implicit_value(std::vector<std::string>(),""), "Script filename")
-    ("library,l", po::value<std::vector<std::string> >()->implicit_value(std::vector<std::string>(),""), "Device library to add");
+    ("DEFAULT_ARGS,D", po::value<std::vector<std::string> >()->implicit_value(std::vector<std::string>(),""), "Add all devices listed in config file as default")
+    ("script,X",       po::value<std::vector<std::string> >()->implicit_value(std::vector<std::string>(),""), "Script filename")
+    ("library,l",      po::value<std::vector<std::string> >()->implicit_value(std::vector<std::string>(),""), "Device library to add");
       
   //Load connections as program options based on DevFac
   std::vector<std::string> connections;
@@ -180,33 +181,74 @@ int main(int argc, char* argv[])
     }
   }
 
-  //setup connections
-  for(int i = 0; i < connections_count; i++){
-    if(commandMap.count(connections[i])){
-      std::string commandString;
-      std::vector<std::string> userOpt = commandMap[connections[i]].as<std::vector<std::string> >(); //get args from command line
+  //If default flag is used, run all arguments in config file
+  if(commandMap.count("DEFAULT_ARGS")){
+    std::vector<std::string> defaultArgs = configMap["DEFAULT_ARGS"].as<std::vector<std::string> >();
+    for (uint iDefault = 0; iDefault < defaultArgs.size(); iDefault++){
+      std::string commandString = "add_device " + defaultArgs[iDefault];
+      std::cout << commandString << std::endl;
+    }
+  }
 
-      if(!userOpt.size()){//flag present with no arguments, use config file arguments
-	try {
-	  std::vector<std::string> configOpt = configMap[connections[i]].as<std::vector<std::string> >(); //get args from config file
-	  for (uint j = 0; j < configOpt.size(); j++) {//iterate through arguments in config file
-	    commandString = "add_device " + connections[i] + " " + configOpt[j];
-	    cli.ProcessString(commandString);
+  //Iterate through devices
+  for (uint iDevice = 0; iDevice < connections.size(); iDevice++) {
+    //If flag for device is found
+    if(commandMap.count(connections[iDevice])) {
+      //Get argument from command line, 
+      std::vector<std::string> userOpt = commandMap[connections[iDevice]].as<std::vector<std::string> >();
+      //If argument is "", Then flag was used with no defaults. So use defaults from config file
+      if(!userOpt.size()) {
+	//Get all default args from config file
+	std::vector<std::string> configOpt = configMap["DEFAULT_ARGS"].as<std::vector<std::string> >();
+	//loop through default args
+	for (uint iDefault = 0; iDefault < configOpt.size(); iDefault++) {
+	  std::string configLine = configOpt[iDefault];
+	  std::string deviceName = configLine.substr(0, configLine.find(" "));
+	  //if Device Name of DEFAULT_ARG matches device name of argument flag used
+	  if(deviceName == connections[iDevice]){
+	    //copy this DEFAULT_ARG and run it
+	    std::string commandString = "add_device " + configOpt[iDefault];
+	    std::cout << commandString << std::endl;
 	  }
-	} catch (std::exception &e) { //tried to use argument from config file but arg is not defined config file
-	  fprintf(stderr, "ERROR getting %s from config file at %s: %s\n", connections[i].c_str(), DEFAULT_CONFIG_FILE, e.what());
-	  return 0;
 	}
-      
-      } else {//iterate through arguments on commandLine
-	commandString = "add_device " + connections[i];
-	for(uint j = 0; j < userOpt.size(); j++){
-	  commandString = "add_device " + connections[i] + " " + userOpt[j];
-	  cli.ProcessString(commandString);
+	//flag on command line is found with user options so run it
+      } else {
+	//run user options
+	for (uint iUser = 0; iUser < userOpt.size(); iUser++) {
+	  std::string commandString = "add_device " + connections[iDevice] + " " + userOpt[iUser];
+	  std::cout << commandString << std::endl;
 	}
       }
     }
   }
+
+  // //setup connections
+  // for(int i = 0; i < connections_count; i++){
+  //   if(commandMap.count(connections[i])){
+  //     std::string commandString;
+  //     std::vector<std::string> userOpt = commandMap[connections[i]].as<std::vector<std::string> >(); //get args from command line
+
+  //     if(!userOpt.size()){//flag present with no arguments, use config file arguments
+  // 	try {
+  // 	  std::vector<std::string> configOpt = configMap[connections[i]].as<std::vector<std::string> >(); //get args from config file
+  // 	  for (uint j = 0; j < configOpt.size(); j++) {//iterate through arguments in config file
+  // 	    commandString = "add_device " + connections[i] + " " + configOpt[j];
+  // 	    cli.ProcessString(commandString);
+  // 	  }
+  // 	} catch (std::exception &e) { //tried to use argument from config file but arg is not defined config file
+  // 	  fprintf(stderr, "ERROR getting %s from config file at %s: %s\n", connections[i].c_str(), DEFAULT_CONFIG_FILE, e.what());
+  // 	  return 0;
+  // 	}
+      
+  //     } else {//iterate through arguments on commandLine
+  // 	commandString = "add_device " + connections[i];
+  // 	for(uint j = 0; j < userOpt.size(); j++){
+  // 	  commandString = "add_device " + connections[i] + " " + userOpt[j];
+  // 	  cli.ProcessString(commandString);
+  // 	}
+  //     }
+  //   }
+  // }
 
   //Load scripts    
   if(commandMap.count("script")){
