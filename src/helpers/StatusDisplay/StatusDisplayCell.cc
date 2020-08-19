@@ -10,6 +10,9 @@
 #include <BUTool/ToolException.hh>
 #include <BUTool/helpers/StatusDisplay/StatusDisplayCell.hh>
 
+#include <arpa/inet.h> //for inet_ntoa and in_addr_t
+
+
 //For PRI macros
 #define __STDC_FORMAT_MACROS
 #include <inttypes.h>
@@ -156,11 +159,11 @@ namespace BUTool{
     const int bufferSize = 20;
     char buffer[bufferSize+1];  //64bit integer can be max 20 ascii chars (as a signed int)
     memset(buffer,' ',20);
-    buffer[20] = '\0';
+    buffer[bufferSize] = '\0';
 
     //Build the format string for snprintf
     std::string fmtString("%");
-    if((format.size() > 1) && (('t' == format[0]) || ('T' == format[0]))){      
+    if((format.size() > 1) && (('t' == format[0]) || ('T' == format[0]))){
       // t(T) is for enum
       std::map<uint64_t,std::string> enumMap;
       size_t iFormat = 1;
@@ -331,6 +334,12 @@ namespace BUTool{
 	snprintf(buffer,bufferSize,
 		 "%3.2e",floatingValue);
       }
+    }else if(iequals(format,std::string("IP"))){
+      struct in_addr addr;
+      addr.s_addr= in_addr_t(ComputeValue());
+      snprintf(buffer,bufferSize,
+	       "%s",inet_ntoa(addr));
+      
     }else{
       //Normal numbers
 

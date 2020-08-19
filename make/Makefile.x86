@@ -52,11 +52,12 @@ ifdef BOOST_LIB
 LIBRARY_PATH +=-L$(BOOST_LIB)
 endif
 
-LIBRARIES =    	-lToolException	\
-		-lreadline 	\
-		-lcurses 	\
-		-lz 		\
-		-lboost_regex 	\
+LIBRARIES =    	-lToolException		\
+		-lreadline 		\
+		-lcurses 		\
+		-lz 			\
+		-lboost_regex 		\
+		-lboost_program_options \
 		-ldl
 
 INSTALL_PATH ?= ./install
