@@ -134,6 +134,7 @@ int main(int argc, char* argv[])
   //std::vector<std::string> connections;
   //int connections_count = 0; 
   std::vector<std::string> devices = DevFac->GetDeviceNames();
+  std::vector<std::string> deviceNames;
   for(size_t iDevice = 0; iDevice < devices.size(); iDevice++){
     std::string  CLI_flag;      
     std::string  CLI_full_flag;
@@ -150,7 +151,7 @@ int main(int argc, char* argv[])
       //(cName, po::value<std::string>(), cDesc);
       delete[] cName;
       delete[] cDesc;
-      //connections.push_back(CLI_full_flag);
+      deviceNames.push_back(CLI_full_flag);
       //connections_count++;
     }
   }
@@ -159,6 +160,7 @@ int main(int argc, char* argv[])
   // Store arguments for program options
   //============================================================================
   //map of all parsed options
+  std::cout << "MIKEKEKEKE" << std::endl;
   std::map<std::string, std::vector<std::string> > allOptions;
 
   //Get parsed options from command line
@@ -227,7 +229,9 @@ int main(int argc, char* argv[])
   }
 
   //Add devices
-  for (auto iDevice = devices.begin(); iDevice != devices.end(); iDevice++) {//iterate through devices
+  std::cout << "deviceNames.size() = " << deviceNames.size() << std::endl;
+  for (auto iDevice = deviceNames.begin(); iDevice != deviceNames.end(); iDevice++) {//iterate through devices
+    std::cout << *iDevice << std::endl;
     std::vector<std::string> device = allOptions[*iDevice]; //get arguments for device
     for (auto iDeviceArgs = device.begin(); iDeviceArgs != device.end(); iDeviceArgs++) {//iterate device arguments
       std::string command = "add_device ";
