@@ -134,10 +134,7 @@ int main(int argc, char* argv[])
     ("help,h", "Help Screen")    
     ("lib,l",       po::value<std::string >()->multitoken(), "Device library plugin to load")
     ("script,X",    po::value<std::string >()->multitoken(), "Script files to load")    
-    ("cmd",         po::value<std::string >()->multitoken(), "Command to run")    
-    ("ApolloSM,a",  po::value<std::string >()->multitoken()->implicit_value(""), "ApolloSM Device")
-    ("DeviceB,b",   po::value<std::string >()->multitoken()->implicit_value(""), "Device type B")
-    ("DeviceC,c",   po::value<std::string >()->multitoken()->implicit_value(""), "Device type C");
+    ("cmd",         po::value<std::string >()->multitoken(), "Command to run");
     
   //Load connections as program options based on DevFac
   //std::vector<std::string> connections;
