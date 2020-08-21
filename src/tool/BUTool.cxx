@@ -95,8 +95,17 @@ int main(int argc, char* argv[])
   if(lib_map.count("lib")){
     std::vector<std::string> libVec = lib_map["lib"].as<std::vector<std::string> >();
     for (auto iLib = libVec.begin(); iLib != libVec.end(); iLib++){
-      std::string command = "add_lib " + *iLib;
-      cli.ProcessString(command);
+      std::string process = "add_lib " + *iLib;
+      //Add a add_lib command for each library
+      cli.ProcessString(process);
+      //Ask the CLI to process this command.
+      std::vector<std::string> command = cli.GetInput(&launcher);
+      //If the command was well formed, tell the launcher to launch it. 
+      if(command.size() > 0){
+	//Launch command function (for add lib)
+	launcher.EvaluateCommand(command);
+	//Ignore the return value.  It either works or not.
+      }
     }
     
     /* Legacy method for adding libraries from system enviornmental variable,
