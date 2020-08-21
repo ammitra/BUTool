@@ -169,11 +169,12 @@ int main(int argc, char* argv[])
   // Store arguments for program options
   //============================================================================
   //map of all parsed options
-  std::cout << "MIKEKEKEKE" << std::endl;
   std::map<std::string, std::vector<std::string> > allOptions;
 
+  std::cout << "Parse command line1" << std::endl;
   //Get parsed options from command line
   po::parsed_options cli_parsed = po::parse_command_line(argc, argv, cli_options);
+  std::cout << "Parse command line2" << std::endl;
   try {
     //cli_parsed = po::parse_command_line(argc, argv, cli_options);
   } catch (std::exception &e) {
@@ -182,10 +183,13 @@ int main(int argc, char* argv[])
     return 0;
   }
   
+  
   //Get parsed options from config file
   std::ifstream configFile2(DEFAULT_CONFIG_FILE);
   po::options_description cfg_options("BUTool Options"); //This needs to exist but doesn't actually need any values
+  std::cout << "Parse config1" << std::endl;
   po::parsed_options cfg_parsed = po::parse_config_file(configFile2, cfg_options, true);
+  std::cout << "Parse config2" << std::endl;
   try {
     //cfg_parsed = po::parse_config_file(configFile, cfg_options, true);
   } catch (std::exception &e) {
