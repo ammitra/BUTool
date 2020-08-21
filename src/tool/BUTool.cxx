@@ -165,7 +165,7 @@ int main(int argc, char* argv[])
     }
   }
 
-  std::cout << cli_options << std::endl;
+  //  std::cout << cli_options << std::endl;
 
   //============================================================================
   // Store arguments for program options
