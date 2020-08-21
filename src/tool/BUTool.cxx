@@ -96,7 +96,7 @@ int main(int argc, char* argv[])
     std::vector<std::string> libVec = lib_map["lib"].as<std::vector<std::string> >();
     for (auto iLib = libVec.begin(); iLib != libVec.end(); iLib++){
       std::string command = "add_lib " + *iLib;
-      std::cout << command << std::endl;
+      cli.ProcessString(command);
     }
     
     /* Legacy method for adding libraries from system enviornmental variable,
@@ -207,16 +207,6 @@ int main(int argc, char* argv[])
     }
   }
 
-  //============================================================================
-  // Run Program Options
-  //============================================================================
-  //library
-  std::vector<std::string> libraries = allOptions["lib"];
-  for (auto iLib = libraries.begin(); iLib != libraries.end(); iLib++) {
-    std::string command = "add_lib " + *iLib;
-    std::cout << command << std::endl;
-  }
-
   //Create a map of default arguments
   std::map<std::string, std::string> default_map;
   std::vector<std::string> defaults = allOptions["DEFAULT_ARGS"];
@@ -224,6 +214,16 @@ int main(int argc, char* argv[])
     std::string device = (*iDefault).substr(0, (*iDefault).find(" ")); //Device is first word before first " "
     std::string device_args = (*iDefault).substr((*iDefault).find(" "), (*iDefault).size() - 1); //Arguments is everything after first " "
     default_map.insert({device, device_args});
+  }
+
+  //============================================================================
+  // Run Program Options
+  //============================================================================
+  //Add libraries
+  std::vector<std::string> libraries = allOptions["lib"];
+  for (auto iLib = libraries.begin(); iLib != libraries.end(); iLib++) {
+    std::string command = "add_lib " + *iLib;
+    cli.ProcessString(command);
   }
 
   //Add devices
@@ -236,7 +236,7 @@ int main(int argc, char* argv[])
       } else {
 	command += *iDevice + " " + *iDeviceArgs;
       }
-      std::cout << command << std::endl;
+      cli.ProcessString(command);
     }
   }
 
@@ -244,14 +244,14 @@ int main(int argc, char* argv[])
   std::vector<std::string> scripts = allOptions["cmd"];
   for (auto iScript = scripts.begin(); iScript != scripts.end(); iScript++) {
     std::string command = "include " + *iScript;
-    std::cout << command << std::endl;
+    cli.ProcessString(command);
   }
 
   //Run commands from command line
   std::vector<std::string> cmds = allOptions["cmd"];
   for (auto iCmd = cmds.begin(); iCmd != cmds.end(); iCmd++) {
     std::string command = *iCmd;
-    std::cout << command << std::endl;
+    cli.ProcessString(command);
   }
 
   //============================================================================
