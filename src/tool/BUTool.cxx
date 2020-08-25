@@ -238,7 +238,6 @@ int main(int argc, char* argv[])
 
   //Add devices
   for (auto iDevice = deviceNames.begin(); iDevice != deviceNames.end(); iDevice++) {//iterate through devices
-    std::cout << *iDevice << std::endl;
     std::vector<std::string> device = allOptions[*iDevice]; //get arguments for device
     for (auto iDeviceArgs = device.begin(); iDeviceArgs != device.end(); iDeviceArgs++) {//iterate device arguments
       std::string command = "add_device ";
