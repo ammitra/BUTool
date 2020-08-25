@@ -209,6 +209,12 @@ int main(int argc, char* argv[])
       fprintf(stderr, "ERROR storing config file arguments: %s\n", e.what());
     }
 
+    //Bail quickly if "help" was specified
+    if(allOptions.find("help") != allOptions.end()){
+      std::cout << cli_options << std::endl;
+      return 0;
+    }
+
     //Create a map of default arguments
     std::map<std::string, std::string> default_map;
     std::vector<std::string> defaults = allOptions["DEFAULT_ARGS"];
