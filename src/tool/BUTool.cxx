@@ -249,7 +249,7 @@ int main(int argc, char* argv[])
     }
 
     //Run scripts
-    std::vector<std::string> scripts = allOptions["cmd"];
+    std::vector<std::string> scripts = allOptions["script"];
     for (auto iScript = scripts.begin(); iScript != scripts.end(); iScript++) {
       std::string command = "include " + *iScript;
       cli.ProcessString(command);
