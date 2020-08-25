@@ -164,9 +164,10 @@ int main(int argc, char* argv[])
     //map of all parsed options
     std::map<std::string, std::vector<std::string> > allOptions;
 
-    //Get parsed options from command line
-    po::parsed_options cli_parsed = po::parse_command_line(argc, argv, cli_options);
     try {
+      //Get parsed options from command line
+      po::parsed_options cli_parsed = po::parse_command_line(argc, argv, cli_options);
+
       //Store cli parsed options into allOptions
       for(size_t iCli = 0; iCli < cli_parsed.options.size(); iCli++) { //iterate through all parsed cli options
 	std::string name = cli_parsed.options[iCli].string_key; //get name "string_key" of option
@@ -184,12 +185,12 @@ int main(int argc, char* argv[])
       return 0;
     }
     
-    //Get parsed options from config file
-    std::ifstream configFile2(DEFAULT_CONFIG_FILE);
     po::options_description cfg_options("BUTool Options"); //This needs to exist but doesn't actually need any values
-    std::cout << "intentional pre parse on configFile2" << std::cout;
-    po::parsed_options cfg_parsed = po::parse_config_file(configFile2, cfg_options, true);
     try {
+      //Get parsed options from config file
+      std::ifstream configFile2(DEFAULT_CONFIG_FILE);
+      po::parsed_options cfg_parsed = po::parse_config_file(configFile2, cfg_options, true);
+      
       //Store cfg parsed options into allOptions
       for(size_t iCfg = 0; iCfg < cfg_parsed.options.size(); iCfg++) { //iterate through all parsed cfg options
 	if(cfg_parsed.options[iCfg].string_key != "lib") { //Ignore libraries, we ran those before declaring cli_options
