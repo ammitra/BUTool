@@ -90,7 +90,8 @@ int main(int argc, char* argv[])
       try {
 	po::store(po::parse_config_file(configFile, lib_options, true), lib_map);
       } catch (std::exception &e) {
-	fprintf(stderr, "ERROR in BOOST parse_config_file: %s\n", e.what());
+	//Probably superflous err message
+	//fprintf(stderr, "ERROR in BOOST parse_config_file: %s\n", e.what());
       }
     }
     //iterate over library arguments
