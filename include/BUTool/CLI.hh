@@ -16,6 +16,8 @@
 //helper for auto-complete
 #include "CLIHelper.hh"
 
+//std::string LimitStringLines(std::string, size_t, size_t);
+
 namespace BUTool {
   
   class CLI
