@@ -77,9 +77,6 @@ LINK_LIBRARY_FLAGS = -shared -fPIC -Wall -g -O3 -rdynamic ${LIBRARY_PATH} ${LIBR
 
 LINK_EXECUTABLE_FLAGS = -Wall -g -O3 -rdynamic ${LIBRARY_PATH} ${EXECUTABLE_LIBRARIES} -Wl,-rpath=${RUNTIME_LDPATH}/lib ${COMPILETIME_ROOT}
 
-
-
-
 .PHONY: all _all clean _cleanall build _buildall self plugin 
 
 default: build
@@ -114,7 +111,7 @@ ${LIBRARY_EXCEPTION_OBJECT_FILES}: obj/%.o : src/%.cc
 # ------------------------
 ${EXECUTABLES}: bin/%.exe: obj/%.o ${EXECUTABLE_OBJECT_FILES}  ${LIBRARY_TOOL}  ${EXECUTABLE_LINKED_LIBRARIES} ${LIBRARY_HELPERS}
 	mkdir -p $(dir $@)
-	${CXX} ${LINK_EXECUTABLE_FLAGS} $< -o $@
+	${CXX} $< -o $@ ${LINK_EXECUTABLE_FLAGS}
 
 ${EXECUTABLE_OBJECT_FILES}: obj/%.o : src/%.cxx
 	mkdir -p $(dir $@)
@@ -127,7 +124,7 @@ ${EXECUTABLE_OBJECT_FILES}: obj/%.o : src/%.cxx
 # ------------------------
 ${LIBRARY_TOOL}: ${LIBRARY_TOOL_OBJECT_FILES} ${LIBRARY_EXCEPTION}
 	mkdir -p $(dir $@)
-	${CXX} ${LINK_LIBRARY_FLAGS} ${LIBRARY_TOOL_OBJECT_FILES} -o $@
+	${CXX} ${LIBRARY_TOOL_OBJECT_FILES} ${LINK_LIBRARY_FLAGS} -o $@
 
 ${LIBRARY_TOOL_OBJECT_FILES}: obj/%.o : src/%.cc 
 	mkdir -p $(dir $@)
