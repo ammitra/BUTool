@@ -15,6 +15,7 @@ typedef boost::unordered_map<std::string, std::string> uMap;
 #include <string>
 #include <map>
 #include <boost/tokenizer.hpp> //for tokenizer
+#include <cmath> // for pow
 
 namespace BUTool{
 
