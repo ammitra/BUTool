@@ -11,7 +11,7 @@
 
 
 namespace BUTool{  
-  class RegisterHelper: public BUTextIO {  
+  class RegisterHelper: private BUTextIO {  
   protected:
     enum RegisterNameCase {UPPER,LOWER,CASE_SENSITIVE};
   public:    
