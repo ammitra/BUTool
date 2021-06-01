@@ -229,8 +229,8 @@ namespace BUTool{
       if(!isdigit(markup[iChar]) || (iChar+1 == markup.size())){
 	//append this number
 	tokens.push_back(strtoul(markup.substr(1,iChar).c_str(),NULL,0));
-	if(('.' == markup[iChar]) && ((iChar+1) < markup.size())){
-	  FindTokenPositions(markup.substr(iChar+1),tokens);
+	if((STATUS_DISPLAY_PARAMETER_PARSE_TOKEN == markup[iChar]) && ((iChar+1) < markup.size())){
+	  FindTokenPositions(markup.substr(iChar),tokens);
 	}
 	break;
       }
