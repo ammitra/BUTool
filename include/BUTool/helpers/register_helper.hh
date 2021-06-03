@@ -3,15 +3,13 @@
 
 #include "../CommandReturn.hh"
 
-#include <BUTextIO/BUTextIO.hh>
-
 #include <string>
 #include <vector>
 #include <stdint.h>
 
 
 namespace BUTool{  
-  class RegisterHelper: virtual public BUTextIO {  
+  class RegisterHelper{  
   protected:
     enum RegisterNameCase {UPPER,LOWER,CASE_SENSITIVE};
   public:    
