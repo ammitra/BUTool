@@ -125,8 +125,7 @@ void BUTool::RegisterHelper::PrintRegAddressRange(uint32_t startAddress,std::vec
 
     //Print the address
     if(readNumber % lineWordCount == 0){
-      //printf("0x%08x: ",  addr);
-      Print(Level::INFO, "0x%08x: ",  addr);
+      printf("0x%08x: ",  addr);
     }      
     //read the value
     uint64_t val = data[readNumber];
@@ -137,21 +136,17 @@ void BUTool::RegisterHelper::PrintRegAddressRange(uint32_t startAddress,std::vec
     }
     //Print the value if we are suppose to
     if(!skipPrintZero ||  (val != 0)){
-      //printf(" 0x%0*" PRIX64, printWord64?16:8, val);	
-      Print(Level::INFO, " 0x%0*" PRIX64, printWord64?16:8, val);
+      printf(" 0x%0*" PRIX64, printWord64?16:8, val);
     }else{
-      //printf("   %*s", printWord64?16:8," ");	
-      Print(Level::INFO, "   %*s", printWord64?16:8," ");
+      printf("   %*s", printWord64?16:8," ");
     }
     //End line
     if(readNumber % lineWordCount == 0){
-      //printf("\n");
-      Print(Level::INFO, "\n");
+      printf("\n");
     }
   }
   //final end line
-  //printf("\n");
-  Print(Level::INFO, "\n");
+  printf("\n");
 }
 
 CommandReturn::status BUTool::RegisterHelper::Read(std::vector<std::string> strArg,
@@ -210,8 +205,7 @@ CommandReturn::status BUTool::RegisterHelper::ReadWithOffsetHelper(uint32_t offs
     break;
   default:
     //===================================
-    //printf("Too many arguments after command\n");
-    Print(Level::INFO, "Too many arguments after command\n");
+    printf("Too many arguments after command\n");
     return CommandReturn::BAD_ARGS;
   }
 
@@ -234,8 +228,7 @@ CommandReturn::status BUTool::RegisterHelper::ReadWithOffsetHelper(uint32_t offs
     }
     //Print the read data
     if(0 != offset){
-      //printf("Applying offset 0x%08X to 0x%08X\n",offset,uint32_t(intArg[0]));
-      Print(Level::INFO, "Applying offset 0x%08X to 0x%08X\n",offset,uint32_t(intArg[0]));
+      printf("Applying offset 0x%08X to 0x%08X\n",offset,uint32_t(intArg[0]));
     }
     PrintRegAddressRange(intArg[0]+offset,readData,printWord64,skipPrintZero);
   } else {
@@ -246,31 +239,26 @@ CommandReturn::status BUTool::RegisterHelper::ReadWithOffsetHelper(uint32_t offs
 	if(0 == offset){
 	  uint32_t val = RegReadRegister(names[iName]);
 	  if(!skipPrintZero || (val != 0)){
-	    //printf("%50s: 0x%08X\n",names[iName].c_str(),val);
-      Print(Level::INFO, "%50s: 0x%08X\n",names[iName].c_str(),val);
+	    printf("%50s: 0x%08X\n",names[iName].c_str(),val);
 	  }	  
 	}else{
 	  uint32_t address = GetRegAddress(names[iName]);
 	  uint32_t val = RegReadAddress(address+offset);
 	  if(!skipPrintZero || (val != 0)){
-	    //printf("%50s + 0x%08X: 0x%08X\n",names[iName].c_str(),offset,val);
-      Print(Level::INFO, "%50s + 0x%08X: 0x%08X\n",names[iName].c_str(),offset,val);
+	    printf("%50s + 0x%08X: 0x%08X\n",names[iName].c_str(),offset,val);
 	  }	  	  
 	}
       }else{
 	//switch to numeric printing because of count
 	uint32_t address = GetRegAddress(names[iName])+offset;
 	if(0 == offset){
-	  //printf("%s:\n",names[iName].c_str());
-    Print(Level::INFO, "%s:\n",names[iName].c_str());
+	  printf("%s:\n",names[iName].c_str());
 	}else{
-	  //printf("%s + 0x%08X:\n",names[iName].c_str(),offset);
-    Print(Level::INFO, "%s + 0x%08X:\n",names[iName].c_str(),offset);
+	  printf("%s + 0x%08X:\n",names[iName].c_str(),offset);
 	}
 	readData = RegBlockReadAddress(address,finalReadCount);
 	PrintRegAddressRange(address,readData,printWord64,skipPrintZero);
-	//printf("\n");
-  Print(Level::INFO, "\n");
+	printf("\n");
       }
     }
   }
@@ -303,12 +291,10 @@ CommandReturn::status BUTool::RegisterHelper::ReadFIFO(std::vector<std::string> 
   std::vector<uint32_t> data;
   if(numericAddr){
     data = RegReadAddressFIFO(intArg[0],readCount);
-    //printf("Read %zu words from 0x%08X:\n",data.size(),uint32_t(intArg[0]));
-    Print(Level::INFO, "Read %zu words from 0x%08X:\n",data.size(),uint32_t(intArg[0]));
+    printf("Read %zu words from 0x%08X:\n",data.size(),uint32_t(intArg[0]));
   }else{
     data = RegReadRegisterFIFO(strArg[0],readCount);
-    //printf("Read %zu words from %s:\n",data.size(),strArg[0].c_str());
-    Print(Level::INFO, "Read %zu words from %s:\n",data.size(),strArg[0].c_str());
+    printf("Read %zu words from %s:\n",data.size(),strArg[0].c_str());
   }
   PrintRegAddressRange(0,data,false,false);
   return CommandReturn::OK;
@@ -319,8 +305,7 @@ CommandReturn::status BUTool::RegisterHelper::ReadString(std::vector<std::string
   if (strArg.size() ==0){
     return CommandReturn::BAD_ARGS;
   }
-  //printf("%s: %s\n",strArg[0].c_str(),RegReadString(strArg[0]).c_str());
-  Print(Level::INFO, "%s: %s\n",strArg[0].c_str(),RegReadString(strArg[0]).c_str());
+  printf("%s: %s\n",strArg[0].c_str(),RegReadString(strArg[0]).c_str());
   return CommandReturn::OK;
 }
 
@@ -337,8 +322,7 @@ CommandReturn::status BUTool::RegisterHelper::Write(std::vector<std::string> str
 
   switch( strArg.size()) {
   case 1:			// address only means Action(masked) write
-    //printf("Mask write to %s\n", saddr.c_str() );
-    Print(Level::INFO, "Mask write to %s\n", saddr.c_str());
+    printf("Mask write to %s\n", saddr.c_str() );
     RegWriteAction(saddr);
     return CommandReturn::OK;
   case 3:                       // We have a count
@@ -356,30 +340,25 @@ CommandReturn::status BUTool::RegisterHelper::Write(std::vector<std::string> str
     return CommandReturn::BAD_ARGS;
   }	
 
-  //printf("Write to ");
-  Print(Level::INFO, "Write to ");
+  printf("Write to ");
   if(isNumericAddress ) {
     if(1 == count){
-      //printf("address 0x%08X\n", uint32_t(intArg[0]) );
-      Print(Level::INFO, "address 0x%08X\n", uint32_t(intArg[0]) );
+      printf("address 0x%08X\n", uint32_t(intArg[0]) );
       RegWriteAddress(uint32_t(intArg[0]),uint32_t(intArg[1]));    
     }else{
       std::vector<uint32_t> data(count,uint32_t(intArg[1]));
-      //printf("address 0x%08X to 0x%08X\n", uint32_t(intArg[0]), uint32_t(intArg[0])+count );
-      Print(Level::INFO, "address 0x%08X to 0x%08X\n", uint32_t(intArg[0]), uint32_t(intArg[0])+count);
+      printf("address 0x%08X to 0x%08X\n", uint32_t(intArg[0]), uint32_t(intArg[0])+count );
       RegBlockWriteAddress(uint32_t(intArg[0]),data);
     }
     
   } else {
     if(1 == count){
-      //printf("register %s\n", saddr.c_str());
-      Print(Level::INFO, "register %s\n", saddr.c_str());
+      printf("register %s\n", saddr.c_str());
       RegWriteRegister(saddr,uint32_t(intArg[1]));
     }else{
       std::vector<uint32_t> data(count,uint32_t(intArg[1]));
       uint32_t address = GetRegAddress(strArg[0]);
-      //printf("address 0x%08X to 0x%08X\n", address, address+count );
-      Print(Level::INFO, "address 0x%08X to 0x%08X\n", address, address+count);
+      printf("address 0x%08X to 0x%08X\n", address, address+count );
       RegBlockWriteAddress(address,data);
     }
   }
@@ -399,8 +378,7 @@ CommandReturn::status BUTool::RegisterHelper::WriteOffset(std::vector<std::strin
       if(isdigit(strArg[0][0])){
 	//numeric address
 	if(0 != offset){
-	  //printf("Addr 0x%08X + 0x%08X\n",uint32_t(intArg[0]),offset);
-    Print(Level::INFO, "Addr 0x%08X + 0x%08X\n",uint32_t(intArg[0]),offset);
+	  printf("Addr 0x%08X + 0x%08X\n",uint32_t(intArg[0]),offset);
 	}
 	//Numeric address, just update it. 
 	strArg[0] = "0"; //make it a number
@@ -409,8 +387,7 @@ CommandReturn::status BUTool::RegisterHelper::WriteOffset(std::vector<std::strin
       }else{
 	//String address, convert to a numeric address 
 	if(0 != offset){
-	  //printf("Addr %s + 0x%08X\n",strArg[0].c_str(),offset);
-    Print(Level::INFO, "Addr %s + 0x%08X\n",strArg[0].c_str(),offset);
+	  printf("Addr %s + 0x%08X\n",strArg[0].c_str(),offset);
 	}
 	uint32_t addr = GetRegAddress(strArg[0]);
 	strArg[0] = "0"; //make it a number 
@@ -482,8 +459,7 @@ CommandReturn::status BUTool::RegisterHelper::ListRegs(std::vector<std::string> 
   bool describe = false;
   bool help = false;
   if( strArg.size() < 1) {
-    //printf("Need regular expression after command\n");
-    Print(Level::INFO, "Need regular expression after command\n");
+    printf("Need regular expression after command\n");
     return CommandReturn::BAD_ARGS;
   }    
   regex = strArg[0];
@@ -514,40 +490,32 @@ CommandReturn::status BUTool::RegisterHelper::ListRegs(std::vector<std::string> 
     uint32_t size = GetRegSize(regName);
     
     //Print main line
-    //printf("  %3zu: %-60s (addr=%08x mask=%08x) ", iReg+1, regNames[iReg].c_str(), addr, mask);
-    Print(Level::INFO, "  %3zu: %-60s (addr=%08x mask=%08x) ", iReg+1, regNames[iReg].c_str(), addr, mask);
+    printf("  %3zu: %-60s (addr=%08x mask=%08x) ", iReg+1, regNames[iReg].c_str(), addr, mask);
 
     //Print mode attribute
-    //printf("%s",GetRegMode(regName).c_str());
-    Print(Level::INFO, "%s",GetRegMode(regName).c_str());
+    printf("%s",GetRegMode(regName).c_str());
 
     //Print permission attribute
-    //printf("%s",GetRegPermissions(regName).c_str());
-    Print(Level::INFO, "%s",GetRegPermissions(regName).c_str());
+    printf("%s",GetRegPermissions(regName).c_str());
     if(size > 1){
       //Print permission attribute
-      //printf(" size=0x%08X",size); 
-      Print(Level::INFO, " size=0x%08X",size);
+      printf(" size=0x%08X",size);
     }
     //End first line
-    //printf("\n");
-    Print(Level::INFO, "\n");
+    printf("\n");
 
     //optional description
     if(describe){
-      //printf("       %s\n",GetRegDescription(regName).c_str());
-      Print(Level::INFO, "       %s\n",GetRegDescription(regName).c_str());
+      printf("       %s\n",GetRegDescription(regName).c_str());
     }
     
     //optional debugging info
     if(debug){
-      //printf("%s\n",GetRegDebug(regName).c_str());
-      Print(Level::DEBUG, "%s\n",GetRegDebug(regName).c_str());
+      printf("%s\n",GetRegDebug(regName).c_str());
     }
     //optional help
     if(help){
-      //printf("%s\n",GetRegHelp(regName).c_str());
-      Print(Level::INFO, "%s\n",GetRegHelp(regName).c_str());
+      printf("%s\n",GetRegHelp(regName).c_str());
     }
 
   }
