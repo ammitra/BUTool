@@ -6,13 +6,17 @@
 #include <string>
 #include <vector>
 #include <stdint.h>
+#include <iostream>
 
 #include <BUTextIO/BUTextIO.hh>
+#include <BUTextIO/PrintLevel.hh>
 
 namespace BUTool{  
-  class RegisterHelper{  
+  class RegisterHelper : private BUTextIO {  
   protected:
     enum RegisterNameCase {UPPER,LOWER,CASE_SENSITIVE};
+    // only let derived classes (device classes) use this BUTextIO functionality
+    void AddStream(Level::level level, std::ostream*os);
   public:    
     RegisterHelper(){regCase = UPPER;}
     RegisterHelper(RegisterNameCase _regCase){regCase = _regCase;}
@@ -71,6 +75,7 @@ namespace BUTool{
 
 
   private:
+    BUTextIO *TextIO;
     RegisterNameCase regCase;
     void PrintRegAddressRange(uint32_t startAddress,std::vector<uint32_t> const & data,bool printWord64 ,bool skipPrintZero);
     CommandReturn::status ReadWithOffsetHelper(uint32_t offset,std::vector<std::string> strArg,std::vector<uint64_t> intArg);
