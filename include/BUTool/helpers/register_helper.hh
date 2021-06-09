@@ -12,12 +12,14 @@
 #include <BUTextIO/PrintLevel.hh>
 
 namespace BUTool{  
-  class RegisterHelper : private BUTextIO {  
+  class RegisterHelper {  
   protected:
     enum RegisterNameCase {UPPER,LOWER,CASE_SENSITIVE};
+
     // only let derived classes (device classes) use this BUTextIO functionality
     void AddStream(Level::level level, std::ostream*os);
-  public:    
+    void GetBUTextIO();
+
     RegisterHelper(){regCase = UPPER;}
     RegisterHelper(RegisterNameCase _regCase){regCase = _regCase;}
 
@@ -54,7 +56,6 @@ namespace BUTool{
 
 
 
-  protected:
     //Handle address table name case (default is upper case)
     RegisterNameCase GetCase(){return regCase;};
     void SetCase(RegisterNameCase _regCase){regCase = _regCase;};
