@@ -11,6 +11,9 @@
 #include <BUTextIO/BUTextIO.hh>
 #include <BUTextIO/PrintLevel.hh>
 
+#include <BUException/ExceptionBase.hh>
+#include <BUTool/ToolException.hh>
+
 namespace BUTool{  
   class RegisterHelper {  
   protected:

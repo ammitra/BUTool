@@ -6,6 +6,14 @@
 #define __STDC_FORMAT_MACROS
 #include <inttypes.h> //for PRI
 
+// used to check if RegisterHelper's TextIO pointer is NULL 
+// (occurs when device class does not call SetupTextIO in its c'tor)
+inline void CheckTextIO(BUTextIO* IO) {
+  if (NULL == IO) {
+    BUException::TEXTIO_BAD_INIT e;
+  }
+}
+
 void BUTool::RegisterHelper::SetupTextIO() {
   char* TEXTIO_DEBUG = getenv("TEXTIO_DEBUG");
   if (dynamic_cast<BUTextIO*>(this)) {
@@ -41,6 +49,7 @@ std::vector<uint32_t> BUTool::RegisterHelper::RegReadAddressFIFO(uint32_t addr,s
   //placeholder for fifo read
   //These should be overloaded if the firmware/software natively supports these features
   //=============================================================================
+  CheckTextIO(TextIO); // make sure TextIO pointer isn't NULL
   std::vector<uint32_t> ret;
   for(size_t iRead = 0; iRead < count; iRead++){
     ret.push_back(RegReadAddress(addr)); 
@@ -52,6 +61,7 @@ std::vector<uint32_t> BUTool::RegisterHelper::RegReadRegisterFIFO(std::string co
   //placeholder for fifo read
   //These should be overloaded if the firmware/software natively supports these features
   //=============================================================================
+  CheckTextIO(TextIO); // make sure TextIO pointer isn't NULL
   uint32_t address = GetRegAddress(reg);
   return RegReadAddressFIFO(address,count);
 }
@@ -61,6 +71,7 @@ std::vector<uint32_t> BUTool::RegisterHelper::RegBlockReadAddress(uint32_t addr,
   //placeholder for block read
   //These should be overloaded if the firmware/software natively supports these features
   //=============================================================================
+  CheckTextIO(TextIO); // make sure TextIO pointer isn't NULL
   std::vector<uint32_t> ret;
   uint32_t addrEnd = addr + uint32_t(count);
   for(;addr < addrEnd;addr++){
@@ -73,6 +84,7 @@ std::vector<uint32_t> BUTool::RegisterHelper::RegBlockReadRegister(std::string c
   //placeholder for block read
   //These should be overloaded if the firmware/software natively supports these features
   //=============================================================================
+  CheckTextIO(TextIO); // make sure TextIO pointer isn't NULL
   uint32_t address = GetRegAddress(reg);
   return RegBlockReadAddress(address,count);
 }
@@ -82,6 +94,7 @@ void BUTool::RegisterHelper::RegWriteAddressFIFO(uint32_t addr,std::vector<uint3
   //placeholder for fifo write
   //These should be overloaded if the firmware/software natively supports these features
   //=============================================================================
+  CheckTextIO(TextIO); // make sure TextIO pointer isn't NULL
   for(size_t i = 0; i < data.size();i++){
     RegWriteAddress(addr,data[i]);
   }
@@ -91,6 +104,7 @@ void BUTool::RegisterHelper::RegWriteRegisterFIFO(std::string const & reg, std::
   //placeholder for fifo write
   //These should be overloaded if the firmware/software natively supports these features
   //=============================================================================
+  CheckTextIO(TextIO); // make sure TextIO pointer isn't NULL
   for(size_t i = 0; i < data.size();i++){
     RegWriteRegister(reg,data[i]);
   }
@@ -100,6 +114,7 @@ void BUTool::RegisterHelper::RegBlockWriteAddress(uint32_t addr,std::vector<uint
   //placeholder for block write
   //These should be overloaded if the firmware/software natively supports these features
   //=============================================================================
+  CheckTextIO(TextIO); // make sure TextIO pointer isn't NULL
   for(size_t i =0;i < data.size();i++){
     RegWriteAddress(addr,data[i]);
     addr++;
@@ -110,6 +125,7 @@ void BUTool::RegisterHelper::RegBlockWriteRegister(std::string const & reg, std:
   //placeholder for block write
   //These should be overloaded if the firmware/software natively supports these features
   //=============================================================================
+  CheckTextIO(TextIO); // make sure TextIO pointer isn't NULL
   uint32_t addr = GetRegAddress(reg);
   RegBlockWriteAddress(addr,data);
 }
@@ -134,7 +150,7 @@ void BUTool::RegisterHelper::ReCase(std::string & name){
 
 
 void BUTool::RegisterHelper::PrintRegAddressRange(uint32_t startAddress,std::vector<uint32_t> const & data,bool printWord64 ,bool skipPrintZero){
-  
+  CheckTextIO(TextIO); // make sure TextIO pointer isn't NULL
   uint32_t addr_incr = printWord64 ? 2 : 1;
   uint32_t readNumber = 0;
   uint32_t lineWordCount = printWord64 ? 4 : 8;
@@ -193,6 +209,7 @@ CommandReturn::status BUTool::RegisterHelper::ReadOffset(std::vector<std::string
 
 
 CommandReturn::status BUTool::RegisterHelper::ReadWithOffsetHelper(uint32_t offset,std::vector<std::string> strArg,std::vector<uint64_t> intArg){
+  CheckTextIO(TextIO); // make sure TextIO pointer isn't NULL
   // sort out arguments
   size_t readCount = 1;
   std::string flags("");
@@ -288,6 +305,7 @@ CommandReturn::status BUTool::RegisterHelper::ReadWithOffsetHelper(uint32_t offs
 
 
 CommandReturn::status BUTool::RegisterHelper::ReadFIFO(std::vector<std::string> strArg,std::vector<uint64_t> intArg){
+  CheckTextIO(TextIO); // make sure TextIO pointer isn't NULL
   // sort out arguments
   size_t readCount = 1;
   bool numericAddr = true;
@@ -323,6 +341,7 @@ CommandReturn::status BUTool::RegisterHelper::ReadFIFO(std::vector<std::string> 
 
 CommandReturn::status BUTool::RegisterHelper::ReadString(std::vector<std::string> strArg,
 							 std::vector<uint64_t> /*intArg*/){
+  CheckTextIO(TextIO); // make sure TextIO pointer isn't NULL
   if (strArg.size() ==0){
     return CommandReturn::BAD_ARGS;
   }
@@ -332,7 +351,7 @@ CommandReturn::status BUTool::RegisterHelper::ReadString(std::vector<std::string
 
 CommandReturn::status BUTool::RegisterHelper::Write(std::vector<std::string> strArg,
 						    std::vector<uint64_t> intArg) {
-
+  CheckTextIO(TextIO); // make sure TextIO pointer isn't NULL
   if (strArg.size() ==0){
     return CommandReturn::BAD_ARGS;
   }
@@ -388,6 +407,7 @@ CommandReturn::status BUTool::RegisterHelper::Write(std::vector<std::string> str
 }
 
 CommandReturn::status BUTool::RegisterHelper::WriteOffset(std::vector<std::string> strArg,std::vector<uint64_t> intArg){
+  CheckTextIO(TextIO); // make sure TextIO pointer isn't NULL
   if(strArg.size() >= 2){
     //check that argument 2 is a number
     if(isdigit(strArg[1][0])){
@@ -423,6 +443,7 @@ CommandReturn::status BUTool::RegisterHelper::WriteOffset(std::vector<std::strin
 
 
 CommandReturn::status BUTool::RegisterHelper::WriteFIFO(std::vector<std::string> strArg,std::vector<uint64_t> intArg){
+  CheckTextIO(TextIO); // make sure TextIO pointer isn't NULL
   uint32_t count = 1;
   uint32_t dataVal;
   
@@ -470,6 +491,7 @@ std::vector<std::string> BUTool::RegisterHelper::RegNameRegexSearch(std::string 
 
 CommandReturn::status BUTool::RegisterHelper::ListRegs(std::vector<std::string> strArg,
 						       std::vector<uint64_t> intArg){
+  CheckTextIO(TextIO); // make sure TextIO pointer isn't NULL
   (void) intArg; // keeps compiler from complaining about unused args
   std::vector<std::string> regNames;
   std::string regex;
