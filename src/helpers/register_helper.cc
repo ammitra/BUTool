@@ -234,31 +234,39 @@ CommandReturn::status BUTool::RegisterHelper::ReadWithOffsetHelper(uint32_t offs
   } else {
     std::vector<std::string> names = RegNameRegexSearch(strArg[0]);
     for(size_t iName = 0; iName < names.size();iName++){
-      if(1 == readCount){
-	//normal printing
-	if(0 == offset){
-	  uint32_t val = RegReadRegister(names[iName]);
-	  if(!skipPrintZero || (val != 0)){
-	    printf("%50s: 0x%08X\n",names[iName].c_str(),val);
-	  }	  
+      //figure out if this is an action register (write only) so we don't read it. 
+      bool actionRegister = (GetRegPermissions(names[iName]).find('r') == std::string::npos);
+      if(!actionRegister){
+	if(1 == readCount){
+	  //normal printing
+	  if(0 == offset){
+	    uint32_t val = RegReadRegister(names[iName]);
+	    if(!skipPrintZero || (val != 0)){
+	      printf("%50s: 0x%08X\n",names[iName].c_str(),val);
+	    }	  
+	  }else{
+	    uint32_t address = GetRegAddress(names[iName]);
+	    uint32_t val = RegReadAddress(address+offset);
+	    if(!skipPrintZero || (val != 0)){
+	      printf("%50s + 0x%08X: 0x%08X\n",names[iName].c_str(),offset,val);
+	    }	  	  
+	  }
 	}else{
-	  uint32_t address = GetRegAddress(names[iName]);
-	  uint32_t val = RegReadAddress(address+offset);
-	  if(!skipPrintZero || (val != 0)){
-	    printf("%50s + 0x%08X: 0x%08X\n",names[iName].c_str(),offset,val);
-	  }	  	  
+	  //switch to numeric printing because of count
+	  uint32_t address = GetRegAddress(names[iName])+offset;
+	  if(0 == offset){
+	    printf("%s:\n",names[iName].c_str());
+	  }else{
+	    printf("%s + 0x%08X:\n",names[iName].c_str(),offset);
+	  }
+	  readData = RegBlockReadAddress(address,finalReadCount);
+	  PrintRegAddressRange(address,readData,printWord64,skipPrintZero);
+	  printf("\n");
 	}
       }else{
-	//switch to numeric printing because of count
-	uint32_t address = GetRegAddress(names[iName])+offset;
-	if(0 == offset){
-	  printf("%s:\n",names[iName].c_str());
-	}else{
-	  printf("%s + 0x%08X:\n",names[iName].c_str(),offset);
+	if(1 == readCount){
+	  printf("%50s: write-only\n",names[iName].c_str());
 	}
-	readData = RegBlockReadAddress(address,finalReadCount);
-	PrintRegAddressRange(address,readData,printWord64,skipPrintZero);
-	printf("\n");
       }
     }
   }
