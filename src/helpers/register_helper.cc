@@ -7,11 +7,18 @@
 #include <inttypes.h> //for PRI
 
 void BUTool::RegisterHelper::SetupTextIO() {
+  char* TEXTIO_DEBUG = getenv("TEXTIO_DEBUG");
   if (dynamic_cast<BUTextIO*>(this)) {
     TextIO = dynamic_cast<BUTextIO*>(this);
+    if (NULL != TEXTIO_DEBUG) {
+      printf("dynamic_cast RegisterHelper this -> BUTextIO succeeded\n");
+    }
   }
   else {
     TextIO = new BUTextIO();
+      if (NULL != TEXTIO_DEBUG) {
+      printf("dynamic_cast RegisterHelper this -> BUTextIO failed, creating new BUTextIO in RegisterHelper\n");
+    }
   }
 }
 
