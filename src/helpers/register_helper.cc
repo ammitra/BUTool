@@ -6,7 +6,7 @@
 #define __STDC_FORMAT_MACROS
 #include <inttypes.h> //for PRI
 
-void BUTool::RegisterHelper::GetBUTextIO() {
+void BUTool::RegisterHelper::SetupTextIO() {
   if (dynamic_cast<BUTextIO*>(this)) {
     TextIO = dynamic_cast<BUTextIO*>(this);
   }

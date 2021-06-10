@@ -18,7 +18,7 @@ namespace BUTool{
 
     // only let derived classes (device classes) use this BUTextIO functionality
     void AddStream(Level::level level, std::ostream*os);
-    void GetBUTextIO();
+    void SetupTextIO();
 
     RegisterHelper(){regCase = UPPER;}
     RegisterHelper(RegisterNameCase _regCase){regCase = _regCase;}
