@@ -106,7 +106,7 @@ self: ${EXECUTABLE_LINKED_LIBRARIES} ${LIBRARY_HELPERS} ${LIBRARY_TOOL}  ${EXECU
 # ------------------------
 # exception library
 # ------------------------
-${LIBRARY_EXCEPTION}: ${LIBRARY_EXCEPTION_OBJECT_FILES}
+${LIBRARY_EXCEPTION}: ${LIBRARY_EXCEPTION_OBJECT_FILES} ${LIBRARY_BUTEXTIO}
 	mkdir -p $(dir $@)
 	${CXX} -shared -fPIC -Wall -g -O3 -rdynamic ${LIBRARY_EXCEPTION_OBJECT_FILES} -o $@
 
@@ -117,7 +117,7 @@ ${LIBRARY_EXCEPTION_OBJECT_FILES}: obj/%.o : src/%.cc
 # ------------------------
 # BUTextIO library
 # ------------------------
-${LIBRARY_BUTEXTIO}: ${LIBRARY_BUTEXTIO_OBJECT_FILES} ${LIBRARY_EXCEPTION}
+${LIBRARY_BUTEXTIO}: ${LIBRARY_BUTEXTIO_OBJECT_FILES} 
 	mkdir -p $(dir $@)
 	${CXX} -shared -fPIC -Wall -g -O3 -rdynamic ${LIBRARY_BUTEXTIO_OBJECT_FILES} -o $@
 
