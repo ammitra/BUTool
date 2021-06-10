@@ -271,38 +271,47 @@ CommandReturn::status BUTool::RegisterHelper::ReadWithOffsetHelper(uint32_t offs
     }
     PrintRegAddressRange(intArg[0]+offset,readData,printWord64,skipPrintZero);
   } else {
-    std::vector<std::string> names = RegNameRegexSearch(strArg[0]);
-    for(size_t iName = 0; iName < names.size();iName++){
-      if(1 == readCount){
-	//normal printing
-	if(0 == offset){
-	  uint32_t val = RegReadRegister(names[iName]);
-	  if(!skipPrintZero || (val != 0)){
-	    TextIO->Print(Level::INFO, "%50s: 0x%08X\n",names[iName].c_str(),val);
-	  }	  
-	}else{
-	  uint32_t address = GetRegAddress(names[iName]);
-	  uint32_t val = RegReadAddress(address+offset);
-	  if(!skipPrintZero || (val != 0)){
-	    TextIO->Print(Level::INFO, "%50s + 0x%08X: 0x%08X\n",names[iName].c_str(),offset,val);
-	  }	  	  
-	}
-      }else{
-	//switch to numeric printing because of count
-	uint32_t address = GetRegAddress(names[iName])+offset;
-	if(0 == offset){
-	  TextIO->Print(Level::INFO, "%s:\n",names[iName].c_str());
-	}else{
-	  TextIO->Print(Level::INFO, "%s + 0x%08X:\n",names[iName].c_str(),offset);
-	}
-	readData = RegBlockReadAddress(address,finalReadCount);
-	PrintRegAddressRange(address,readData,printWord64,skipPrintZero);
-	TextIO->Print(Level::INFO, "\n");
+      std::vector<std::string> names = RegNameRegexSearch(strArg[0]);
+      for(size_t iName = 0; iName < names.size();iName++){
+        //figure out if this is an action register (write only) so we don't read it. 
+        bool actionRegister = (GetRegPermissions(names[iName]).find('r') == std::string::npos);
+        if(!actionRegister){
+          if(1 == readCount){
+            //normal printing
+            if(0 == offset){
+              uint32_t val = RegReadRegister(names[iName]);
+              if(!skipPrintZero || (val != 0)){
+                TextIO->Print(Level::INFO, "%50s: 0x%08X\n",names[iName].c_str(),val);
+              }	  
+            }else{
+              uint32_t address = GetRegAddress(names[iName]);
+              uint32_t val = RegReadAddress(address+offset);
+              if(!skipPrintZero || (val != 0)){
+                TextIO->Print(Level::INFO, "%50s + 0x%08X: 0x%08X\n",names[iName].c_str(),offset,val);
+              }
+            }
+          }else{
+            //switch to numeric printing because of count
+            uint32_t address = GetRegAddress(names[iName])+offset;
+            if(0 == offset){
+              TextIO->Print(Level::INFO, "%s:\n",names[iName].c_str());
+            }else{
+              TextIO->Print(Level::INFO, "%s + 0x%08X:\n",names[iName].c_str(),offset);
+            }
+            readData = RegBlockReadAddress(address,finalReadCount);
+            PrintRegAddressRange(address,readData,printWord64,skipPrintZero);
+            TextIO->Print(Level::INFO, "\n");
+          }
+        }else{
+	        if(1 == readCount){
+            TextIO->Print(Level::INFO, "%50s: write-only\n",names[iName].c_str());
+	        }
+        }
       }
     }
-  }
   return CommandReturn::OK;
 }
+
 
 
 CommandReturn::status BUTool::RegisterHelper::ReadFIFO(std::vector<std::string> strArg,std::vector<uint64_t> intArg){
