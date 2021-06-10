@@ -30,9 +30,5 @@ void BUTextController::AddOutputStream(std::ostream *os) {
 }
 
 void BUTextController::ResetStreams() {
-    std::vector<std::ostream*>::iterator it;
-    for (it = streams.begin(); it != streams.end(); it++) {
-        delete (*it);
-    }
     streams.clear();
 }
