@@ -11,6 +11,7 @@
 inline void CheckTextIO(BUTextIO* IO) {
   if (NULL == IO) {
     BUException::TEXTIO_BAD_INIT e;
+    throw e;
   }
 }
 
