@@ -9,6 +9,7 @@
 #include <sstream>
 #include <string>
 #include <fstream>
+#include <algorithm> // std::find_if
 
 class BUTextController {
 private:
