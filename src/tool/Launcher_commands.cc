@@ -3,7 +3,7 @@
 #include <stdio.h>  
 #define __STDC_FORMAT_MACROS
 #include <inttypes.h>
-
+#include <fstream> // For BUTextIO file redirection of ofstreams
 using namespace BUTool;
 
 void Launcher::LoadCommandList()
@@ -50,6 +50,11 @@ void Launcher::LoadCommandList()
 	     "Change the print level for exceptions (9 == all).\n"\
 	     "  Usage:\n"\
 	     "  verbose <level>\n");  
+  AddCommand("add_dev_ofile",&Launcher::AddDeviceOutputFile,
+	     "Place device print calls in filename.\n"\
+	     "  Usage:\n"\
+	     "  add_dev_ofile filename <device#>\n"\
+             "  If no device# listed, it will be added to all devices\n");  
 }
 
 CommandReturn::status Launcher::SetVerbosity(std::vector<std::string> strArg,std::vector<uint64_t> intArg){
@@ -380,6 +385,47 @@ CommandReturn::status Launcher::SelectDevice(std::vector<std::string>,std::vecto
     }else{
       printf("Error: %" PRIu64 " out of range (%zu)",iArg[0],device.size());
     }
+    return CommandReturn::OK;
+  }
+  return CommandReturn::BAD_ARGS;
+}
+
+
+CommandReturn::status Launcher::AddDeviceOutputFile(std::vector<std::string> strArg,std::vector<uint64_t> iArg){
+  if(iArg.size() >= 1){
+    //create the file
+    std::ofstream * newStream = new std::ofstream(strArg[0].c_str(),std::ofstream::trunc);
+    //Check that the file is ok
+    if(NULL == newStream || newStream->fail()){
+      printf("Error: %s could not be opened\n",strArg[0].c_str());
+      return CommandReturn::BAD_ARGS;      
+    }
+    //add the newStream to the lis of ostreams that Launcher needs to clean up at the end. 
+    ownedOutputStreams.push_back(newStream);
+
+    //By default we add this stream to all devices
+    size_t iStartDev = 0;
+    size_t iEndDev = device.size();
+    if(iArg.size() > 1){
+      //A specific device has been added.
+      iStartDev = iArg[1];
+      iEndDev = iArg[1]+1; //Cause the following loop to end after iArg[i]
+    }
+
+    for(size_t iDev = iStartDev; 
+	iDev < device.size() && iDev < iEndDev;
+	iDev++){
+      if(iDev < device.size()){
+	BUTextIO * text_ptr = NULL; 
+	if(
+	   (text_ptr = dynamic_cast<BUTextIO*>(device[iArg[0]])) 
+	   ){
+	  text_ptr->AddOutputStream(Level::INFO,newStream);
+	}	
+      }else{
+	printf("Error: %" PRIu64 " out of range (%zu)",iArg[0],device.size());
+      }   
+    } 
     return CommandReturn::OK;
   }
   return CommandReturn::BAD_ARGS;
