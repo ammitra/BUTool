@@ -19,11 +19,12 @@ http://gauss.bu.edu/redmine/projects/butool/wiki/BUTool_Wiki
   $ sudo apt install libboost-regex-dev build-essential zlib1g-dev libreadline-dev libboost-dev libboost-program-options-dev libncurses5-dev
 ```
 
-## Build instructions (linux native, this probably means you)
+## Build instructions for local build
 After checking out the BUTool source:
 ```Bash
  $ cp mk/Makefile.local ./Makefile
  $ make
+ $ source env.sh
  $ BUTool.exe
 ```
 
