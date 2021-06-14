@@ -25,7 +25,8 @@ void BUTool::RegisterHelper::SetupTextIO() {
   }
   else {
     TextIO = new BUTextIO();
-      if (NULL != TEXTIO_DEBUG) {
+    newTextIO = true;
+    if (NULL != TEXTIO_DEBUG) {
       printf("dynamic_cast RegisterHelper this -> BUTextIO failed, creating new BUTextIO in RegisterHelper\n");
     }
   }

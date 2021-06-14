@@ -1,7 +1,5 @@
 #ifndef __PRINT_HH__
 #define __PRINT_HH__
-#pragma once
-
 /*
  * Modified for use with BUTool from the work found here:
  * https://github.com/WingTillDie/CxxPrintf
