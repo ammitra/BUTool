@@ -1,11 +1,15 @@
 BUTOOL_PATH=$(shell pwd)
 BUILD_MODE = x86
 
+export CACTUS_ROOT
+export UIO_UHAL_PATH
+
+
 #x86 linux
 CXX=g++
 RUNTIME_LDPATH?=${PWD}
 
-HAS_FALLTHROUGH=$(shell ./make/has_Wimplicit-fallthrough)
+HAS_FALLTHROUGH=$(shell ./mk/has_Wimplicit-fallthrough)
 ifeq (${HAS_FALLTHROUGH},1)
      FALLTHROUGH_FLAGS= -Wimplicit-fallthrough=0
 else
@@ -19,6 +23,10 @@ LIBRARY_EXCEPTION = lib/libToolException.so
 LIBRARY_EXCEPTION_SOURCES  = $(wildcard src/BUException/*.cc)
 LIBRARY_EXCEPTION_OBJECT_FILES = $(patsubst src/%.cc,obj/%.o,${LIBRARY_EXCEPTION_SOURCES})
 
+# BUTextIO class
+LIBRARY_BUTEXTIO = lib/libBUTool_BUTextIO.so
+LIBRARY_BUTEXTIO_SOURCES = $(wildcard src/BUTextIO/*.cc)
+LIBRARY_BUTEXTIO_OBJECT_FILES = $(patsubst src/%.cc,obj/%.o,${LIBRARY_BUTEXTIO_SOURCES})
 
 LIBRARY_TOOL = lib/libBUTool.so
 LIBRARY_TOOL_SOURCES  = $(wildcard src/tool/*.cc)
@@ -58,7 +66,8 @@ LIBRARIES =    	-lToolException		\
 		-lz 			\
 		-lboost_regex 		\
 		-lboost_program_options \
-		-ldl
+		-ldl \
+		-lBUTool_BUTextIO
 
 INSTALL_PATH ?= ./install
 
@@ -101,7 +110,7 @@ self: ${EXECUTABLE_LINKED_LIBRARIES} ${LIBRARY_HELPERS} ${LIBRARY_TOOL}  ${EXECU
 # ------------------------
 # exception library
 # ------------------------
-${LIBRARY_EXCEPTION}: ${LIBRARY_EXCEPTION_OBJECT_FILES}
+${LIBRARY_EXCEPTION}: ${LIBRARY_EXCEPTION_OBJECT_FILES} ${LIBRARY_BUTEXTIO}
 	mkdir -p $(dir $@)
 	${CXX} -shared -fPIC -Wall -g -O3 -rdynamic ${LIBRARY_EXCEPTION_OBJECT_FILES} -o $@
 
@@ -109,6 +118,16 @@ ${LIBRARY_EXCEPTION_OBJECT_FILES}: obj/%.o : src/%.cc
 	mkdir -p $(dir $@)
 	${CXX} ${CXX_FLAGS} -c $< -o $@
 
+# ------------------------
+# BUTextIO library
+# ------------------------
+${LIBRARY_BUTEXTIO}: ${LIBRARY_BUTEXTIO_OBJECT_FILES} 
+	mkdir -p $(dir $@)
+	${CXX} -shared -fPIC -Wall -g -O3 -rdynamic ${LIBRARY_BUTEXTIO_OBJECT_FILES} -o $@
+
+${LIBRARY_BUTEXTIO_OBJECT_FILES}: obj/%.o : src/%.cc
+	mkdir -p $(dir $@)
+	${CXX} ${CXX_FLAGS} -c $< -o $@
 
 # ------------------------
 # Executables
