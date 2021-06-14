@@ -9,7 +9,7 @@ export UIO_UHAL_PATH
 CXX=g++
 RUNTIME_LDPATH?=${PWD}
 
-HAS_FALLTHROUGH=$(shell ./make/has_Wimplicit-fallthrough)
+HAS_FALLTHROUGH=$(shell ./mk/has_Wimplicit-fallthrough)
 ifeq (${HAS_FALLTHROUGH},1)
      FALLTHROUGH_FLAGS= -Wimplicit-fallthrough=0
 else
