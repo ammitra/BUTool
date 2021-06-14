@@ -1,6 +1,10 @@
 BUTOOL_PATH=$(shell pwd)
 BUILD_MODE = x86
 
+export CACTUS_ROOT
+export UIO_UHAL_PATH
+
+
 #x86 linux
 CXX=g++
 RUNTIME_LDPATH?=${PWD}
