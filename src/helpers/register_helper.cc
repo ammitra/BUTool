@@ -6,6 +6,20 @@
 #define __STDC_FORMAT_MACROS
 #include <inttypes.h> //for PRI
 
+BUTool::RegisterHelper::RegisterHelper() : newTextIO(false) {
+  regCase = UPPER;
+}
+
+BUTool::RegisterHelper::RegisterHelper(RegisterNameCase _regCase) : newTextIO(false) {
+  regCase = _regCase;
+}
+
+BUTool::RegisterHelper::~RegisterHelper() {
+  if (newTextIO) {
+    delete TextIO;
+  }
+}
+
 // used to check if RegisterHelper's TextIO pointer is NULL 
 // (occurs when device class does not call SetupTextIO in its c'tor)
 inline void CheckTextIO(BUTextIO* IO) {

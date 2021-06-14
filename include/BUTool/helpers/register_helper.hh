@@ -23,9 +23,9 @@ namespace BUTool{
     void AddStream(Level::level level, std::ostream*os);
     void SetupTextIO();
 
-    RegisterHelper() : newTextIO(false) {regCase = UPPER;}
-    RegisterHelper(RegisterNameCase _regCase) : newTextIO(false) {regCase = _regCase;}
-    ~RegisterHelper() {if (newTextIO) {delete TextIO;}}
+    RegisterHelper();
+    RegisterHelper(RegisterNameCase _regCase);
+    ~RegisterHelper();
 
     virtual std::vector<std::string> myMatchRegex(std::string regex)=0;
     
