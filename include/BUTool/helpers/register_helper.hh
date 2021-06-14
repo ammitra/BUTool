@@ -23,8 +23,9 @@ namespace BUTool{
     void AddStream(Level::level level, std::ostream*os);
     void SetupTextIO();
 
-    RegisterHelper(){regCase = UPPER;}
-    RegisterHelper(RegisterNameCase _regCase){regCase = _regCase;}
+    RegisterHelper() : newTextIO(false) {regCase = UPPER;}
+    RegisterHelper(RegisterNameCase _regCase) : newTextIO(false) {regCase = _regCase;}
+    ~RegisterHelper() {if (newTextIO) {delete TextIO;}}
 
     virtual std::vector<std::string> myMatchRegex(std::string regex)=0;
     
@@ -80,6 +81,7 @@ namespace BUTool{
 
   private:
     BUTextIO *TextIO;
+    bool newTextIO;
     RegisterNameCase regCase;
     void PrintRegAddressRange(uint32_t startAddress,std::vector<uint32_t> const & data,bool printWord64 ,bool skipPrintZero);
     CommandReturn::status ReadWithOffsetHelper(uint32_t offset,std::vector<std::string> strArg,std::vector<uint64_t> intArg);
