@@ -81,15 +81,15 @@ EXECUTABLE_LIBRARIES = ${LIBRARIES} ${EXECUTABLE_LINKED_LIBRARY_FLAGS}
 
 CXX_FLAGS = -g -O3 -rdynamic -Wall -MMD -MP -fPIC ${INCLUDE_PATH} -Werror -Wno-literal-suffix
 
-CXX_FLAGS += -std=c++11 -fno-omit-frame-pointer -pedantic -Wno-ignored-qualifiers -Werror=return-type -Wextra -Wno-long-long -Winit-self -Wno-unused-local-typedefs  -Woverloaded-virtual ${COMPILETIME_ROOT} ${FALLTHROUGH_FLAGS}
+CXX_FLAGS += -std=c++11 -fno-omit-frame-pointer -pedantic -Wno-ignored-qualifiers -Werror=return-type -Wextra -Wno-long-long -Winit-self -Wno-unused-local-typedefs  -Woverloaded-virtual ${COMPILETIME_ROOT} ${FALLTHROUGH_FLAGS} -Wno-unused-result
 
 ifdef MAP_TYPE
 CXX_FLAGS += ${MAP_TYPE}
 endif
 
-LINK_LIBRARY_FLAGS = -shared -fPIC -Wall -g -O3 -rdynamic ${LIBRARY_PATH} ${LIBRARIES} -Wl,-rpath=${RUNTIME_LDPATH}/lib ${COMPILETIME_ROOT}
+LINK_LIBRARY_FLAGS = -shared -fPIC -Wall -Wl,--no-as-needed -g -O3 -rdynamic ${LIBRARY_PATH} ${LIBRARIES} -Wl,-rpath=${RUNTIME_LDPATH}/lib ${COMPILETIME_ROOT}
 
-LINK_EXECUTABLE_FLAGS = -Wall -g -O3 -rdynamic ${LIBRARY_PATH} ${EXECUTABLE_LIBRARIES} -Wl,-rpath=${RUNTIME_LDPATH}/lib ${COMPILETIME_ROOT}
+LINK_EXECUTABLE_FLAGS = -Wall -Wl,--no-as-needed -g -O3 -rdynamic ${LIBRARY_PATH} ${EXECUTABLE_LIBRARIES} -Wl,-rpath=${RUNTIME_LDPATH}/lib ${COMPILETIME_ROOT}
 
 .PHONY: all _all clean _cleanall build _buildall self plugin 
 
