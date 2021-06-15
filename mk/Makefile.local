@@ -1,3 +1,4 @@
+SHELL = bash
 BUTOOL_PATH=$(shell pwd)
 BUILD_MODE = x86
 
