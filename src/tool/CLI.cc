@@ -152,9 +152,9 @@ namespace BUTool{
 	  includeFilename = line.substr(includeString.size());
 	} else {
 	  includeFilename = line.substr(loadString.size());
-	  //add the load to the history
-	  add_history(line.c_str());	  
 	}
+	//add the load to the history
+	add_history(line.c_str());	  
 	
 	//remove any white space
 	while((includeFilename.size() > 0) && (includeFilename[0] == ' '))
